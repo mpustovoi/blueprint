@@ -27,6 +27,7 @@ public final class TestItems {
 
 	public static final DeferredRegister<String> DECORATED_POT_PATTERNS = DeferredRegister.create(Registries.DECORATED_POT_PATTERNS, BlueprintTest.MOD_ID);
 	public static final RegistryObject<String> TEST_POTTERY_SHERD = DECORATED_POT_PATTERNS.register("test_pottery_pattern", () -> "test_pottery_pattern");
+	public static final RegistryObject<Item> PRIMAL_ARMOR_TRIM_SMITHING_TEMPLATE = HELPER.createItem("primal_armor_trim_smithing_template", () -> SmithingTemplateItem.createArmorTrimTemplate(TestTrimPatterns.PRIMAL));
 
 	public static void setupTabEditors() {
 		CreativeModeTabContentsPopulator.mod(BlueprintTest.MOD_ID)

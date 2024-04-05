@@ -3,6 +3,7 @@ package core.data.server;
 import com.teamabnormals.blueprint.core.other.tags.BlueprintBlockTags;
 import com.teamabnormals.blueprint.core.other.tags.BlueprintItemTags;
 import core.BlueprintTest;
+import core.registry.TestItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
@@ -29,6 +30,7 @@ public final class TestItemTagsProvider extends ItemTagsProvider {
 		this.tag(BlueprintItemTags.STRIDER_TEMPT_ITEMS).add(Items.SPYGLASS);
 		this.tag(BlueprintItemTags.OCELOT_FOOD).add(Items.DIRT, Items.DIRT_PATH);
 		this.tag(BlueprintItemTags.CAT_FOOD).add(Items.APPLE);
+		this.tag(ItemTags.TRIM_TEMPLATES).add(TestItems.PRIMAL_ARMOR_TRIM_SMITHING_TEMPLATE.get());
 	}
 
 }

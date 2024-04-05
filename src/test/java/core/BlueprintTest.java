@@ -16,6 +16,7 @@ import common.world.TestGlobalStorage;
 import core.data.client.TestAssetsRemolderProvider;
 import core.data.client.TestEndimationProvider;
 import core.data.client.TestSplashProvider;
+import core.data.client.TestSpriteSourceProvider;
 import core.data.server.*;
 import core.registry.TestBlockEntities;
 import core.registry.TestEntities;
@@ -122,6 +123,7 @@ public final class BlueprintTest {
 		generator.addProvider(includeServer, new TestDataRemolderProvider(packOutput, lookupProvider));
 
 		boolean includeClient = event.includeClient();
+		generator.addProvider(includeClient, new TestSpriteSourceProvider(packOutput, helper));
 		generator.addProvider(includeClient, new TestEndimationProvider(packOutput));
 		generator.addProvider(includeClient, new TestSplashProvider(packOutput));
 		generator.addProvider(includeClient, new TestAssetsRemolderProvider(packOutput, lookupProvider));

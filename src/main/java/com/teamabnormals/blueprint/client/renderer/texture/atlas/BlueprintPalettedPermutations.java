@@ -2,6 +2,7 @@ package com.teamabnormals.blueprint.client.renderer.texture.atlas;
 
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -38,20 +39,20 @@ import java.util.function.Supplier;
 public class BlueprintPalettedPermutations implements SpriteSource {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final Codec<BlueprintPalettedPermutations> CODEC = RecordCodecBuilder.create((instance) -> {
-		return instance.group(Codec.list(SpriteSources.CODEC).fieldOf("sources").forGetter((permutations) -> {
-			return permutations.sources;
+		return instance.group(Codec.mapEither(Codec.list(SpriteSources.CODEC).fieldOf("sources"), Codec.list(ResourceLocation.CODEC).fieldOf("textures")).forGetter((permutations) -> {
+			return permutations.sourcesOrTextures;
 		}), ResourceLocation.CODEC.fieldOf("palette_key").forGetter((permutations) -> {
 			return permutations.paletteKey;
 		}), Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC).fieldOf("permutations").forGetter((permutations) -> {
 			return permutations.permutations;
 		})).apply(instance, BlueprintPalettedPermutations::new);
 	});
-	private final List<SpriteSource> sources;
+	private final Either<List<SpriteSource>, List<ResourceLocation>> sourcesOrTextures;
 	private final Map<String, ResourceLocation> permutations;
 	private final ResourceLocation paletteKey;
 
-	public BlueprintPalettedPermutations(List<SpriteSource> sources, ResourceLocation p_266681_, Map<String, ResourceLocation> p_266741_) {
-		this.sources = sources;
+	public BlueprintPalettedPermutations(Either<List<SpriteSource>, List<ResourceLocation>> sourcesOrTextures, ResourceLocation p_266681_, Map<String, ResourceLocation> p_266741_) {
+		this.sourcesOrTextures = sourcesOrTextures;
 		this.permutations = p_266741_;
 		this.paletteKey = p_266681_;
 	}
@@ -62,41 +63,44 @@ public class BlueprintPalettedPermutations implements SpriteSource {
 		this.permutations.forEach((p_267108_, p_266969_) -> {
 			map.put(p_267108_, Suppliers.memoize(() -> createPaletteMapping(supplier.get(), loadPaletteEntryFromImage(manager, p_266969_))));
 		});
-		HashMap<ResourceLocation, SpriteSource.SpriteSupplier> tempOutputMap = new HashMap<>();
-		Output tempOutput = new Output() {
-			@Override
-			public void add(ResourceLocation location, SpriteSupplier spriteSupplier) {
-				SpriteSource.SpriteSupplier oldSupplier = tempOutputMap.put(location, spriteSupplier);
-				if (oldSupplier != null) oldSupplier.discard();
-			}
 
-			@Override
-			public void removeAll(Predicate<ResourceLocation> predicate) {
-				Iterator<Map.Entry<ResourceLocation, SpriteSupplier>> iterator = tempOutputMap.entrySet().iterator();
-				while (iterator.hasNext()) {
-					Map.Entry<ResourceLocation, SpriteSource.SpriteSupplier> entry = iterator.next();
-					if (predicate.test(entry.getKey())) {
-						entry.getValue().discard();
-						iterator.remove();
+		Iterator<ResourceLocation> locationIterator = this.sourcesOrTextures.map(sources -> {
+			HashMap<ResourceLocation, SpriteSource.SpriteSupplier> tempOutputMap = new HashMap<>();
+			Output tempOutput = new Output() {
+				@Override
+				public void add(ResourceLocation location, SpriteSupplier spriteSupplier) {
+					SpriteSource.SpriteSupplier oldSupplier = tempOutputMap.put(location, spriteSupplier);
+					if (oldSupplier != null) oldSupplier.discard();
+				}
+
+				@Override
+				public void removeAll(Predicate<ResourceLocation> predicate) {
+					Iterator<Map.Entry<ResourceLocation, SpriteSupplier>> iterator = tempOutputMap.entrySet().iterator();
+					while (iterator.hasNext()) {
+						Map.Entry<ResourceLocation, SpriteSource.SpriteSupplier> entry = iterator.next();
+						if (predicate.test(entry.getKey())) {
+							entry.getValue().discard();
+							iterator.remove();
+						}
 					}
 				}
+			};
+			for (SpriteSource source : sources) {
+				source.run(manager, tempOutput);
 			}
-		};
+			return tempOutputMap.keySet().iterator();
+		}, List::iterator);
 
-		for (SpriteSource source : this.sources) {
-			source.run(manager, tempOutput);
-		}
-
-		for (var collectedEntry : tempOutputMap.entrySet()) {
-			ResourceLocation resourcelocation = collectedEntry.getKey();
-			ResourceLocation resourcelocation1 = TEXTURE_ID_CONVERTER.idToFile(resourcelocation);
+		while (locationIterator.hasNext()) {
+			ResourceLocation location = locationIterator.next();
+			ResourceLocation resourcelocation1 = TEXTURE_ID_CONVERTER.idToFile(location);
 			Optional<Resource> optional = manager.getResource(resourcelocation1);
 			if (optional.isEmpty()) {
 				LOGGER.warn("Unable to find texture {}", resourcelocation1);
 			} else {
 				LazyLoadedImage lazyloadedimage = new LazyLoadedImage(resourcelocation1, optional.get(), map.size());
 				for (Map.Entry<String, Supplier<IntUnaryOperator>> entry : map.entrySet()) {
-					ResourceLocation resourcelocation2 = resourcelocation.withSuffix("_" + entry.getKey());
+					ResourceLocation resourcelocation2 = location.withSuffix("_" + entry.getKey());
 					output.add(resourcelocation2, new BlueprintPalettedPermutations.PalettedSpriteSupplier(lazyloadedimage, entry.getValue(), resourcelocation2));
 				}
 			}

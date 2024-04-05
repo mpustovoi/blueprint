@@ -1,0 +1,7 @@
+{
+  "asset_id": "blueprint_test:primal",
+  "description": {
+    "translate": "trim_pattern.blueprint_test.primal"
+  },
+  "template_item": "blueprint_test:primal_armor_trim_smithing_template"
+}

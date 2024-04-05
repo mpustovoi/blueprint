@@ -12,6 +12,7 @@ import com.teamabnormals.blueprint.core.registry.BlueprintDataPackRegistries;
 import com.teamabnormals.blueprint.core.registry.BlueprintHolderSets;
 import com.teamabnormals.blueprint.core.util.BiomeUtil;
 import core.BlueprintTest;
+import core.registry.TestTrimPatterns;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistrySetBuilder;
@@ -37,7 +38,11 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public final class TestDatapackBuiltinEntriesProvider extends DatapackBuiltinEntriesProvider {
-	private static final RegistrySetBuilder BUILDER = new RegistrySetBuilder().add(Registries.BIOME, BlueprintDatapackBuiltinEntriesProvider::bootstrapBiomes).add(BlueprintDataPackRegistries.STRUCTURE_REPALETTERS, TestDatapackBuiltinEntriesProvider::bootstrapStructureRepaletters).add(BlueprintDataPackRegistries.MODDED_BIOME_SLICES, TestDatapackBuiltinEntriesProvider::bootstrapSlices);
+	private static final RegistrySetBuilder BUILDER = new RegistrySetBuilder()
+			.add(Registries.BIOME, BlueprintDatapackBuiltinEntriesProvider::bootstrapBiomes)
+			.add(BlueprintDataPackRegistries.STRUCTURE_REPALETTERS, TestDatapackBuiltinEntriesProvider::bootstrapStructureRepaletters)
+			.add(BlueprintDataPackRegistries.MODDED_BIOME_SLICES, TestDatapackBuiltinEntriesProvider::bootstrapSlices)
+			.add(Registries.TRIM_PATTERN, TestTrimPatterns::bootstrap);
 
 	public TestDatapackBuiltinEntriesProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
 		super(output, registries, BUILDER, Set.of(BlueprintTest.MOD_ID));
