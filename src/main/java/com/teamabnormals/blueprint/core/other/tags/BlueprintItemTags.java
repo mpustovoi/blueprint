@@ -16,13 +16,6 @@ public class BlueprintItemTags {
 	public static final TagKey<Item> MILK = TagUtil.itemTag("forge", "milk");
 	public static final TagKey<Item> PUMPKINS = TagUtil.itemTag("forge", "pumpkins");
 
-	public static final TagKey<Item> TOOLS = TagUtil.itemTag("forge", "tools");
-	public static final TagKey<Item> TOOLS_AXES = TagUtil.itemTag("forge", "tools/axes");
-	public static final TagKey<Item> TOOLS_HOES = TagUtil.itemTag("forge", "tools/hoes");
-	public static final TagKey<Item> TOOLS_PICKAXES = TagUtil.itemTag("forge", "tools/pickaxes");
-	public static final TagKey<Item> TOOLS_SHOVELS = TagUtil.itemTag("forge", "tools/shovels");
-	public static final TagKey<Item> TOOLS_SWORDS = TagUtil.itemTag("forge", "tools/swords");
-
 	public static final TagKey<Item> BUCKETS = TagUtil.itemTag("forge", "buckets");
 	public static final TagKey<Item> BUCKETS_EMPTY = TagUtil.itemTag("forge", "buckets/empty");
 	public static final TagKey<Item> BUCKETS_WATER = TagUtil.itemTag("forge", "buckets/water");

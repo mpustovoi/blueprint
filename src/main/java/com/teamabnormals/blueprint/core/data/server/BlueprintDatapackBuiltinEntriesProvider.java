@@ -24,7 +24,9 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public final class BlueprintDatapackBuiltinEntriesProvider extends DatapackBuiltinEntriesProvider {
-	private static final RegistrySetBuilder BUILDER = new RegistrySetBuilder().add(Registries.BIOME, BlueprintDatapackBuiltinEntriesProvider::bootstrapBiomes).add(BlueprintDataPackRegistries.MODDED_BIOME_SLICES, BlueprintDatapackBuiltinEntriesProvider::bootstrapSlices);
+	private static final RegistrySetBuilder BUILDER = new RegistrySetBuilder()
+			.add(Registries.BIOME, BlueprintDatapackBuiltinEntriesProvider::bootstrapBiomes)
+			.add(BlueprintDataPackRegistries.MODDED_BIOME_SLICES, BlueprintDatapackBuiltinEntriesProvider::bootstrapSlices);
 
 	public BlueprintDatapackBuiltinEntriesProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
 		super(output, lookupProvider, BUILDER, Set.of(Blueprint.MOD_ID));
