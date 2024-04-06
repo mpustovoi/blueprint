@@ -1,5 +1,6 @@
 package com.teamabnormals.blueprint.core.api.conditions;
 
+import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -52,6 +53,18 @@ public class ConfigValueCondition implements ICondition {
 		this.valueID = valueID;
 		this.predicates = predicates;
 		this.inverted = inverted;
+	}
+
+	public ConfigValueCondition(String modid, String valueID, Map<IConfigPredicate, Boolean> predicates, boolean inverted) {
+		this(new ResourceLocation(modid, "config"), null, valueID, predicates, inverted);
+	}
+
+	public ConfigValueCondition(String modid, String valueID, boolean inverted) {
+		this(modid, valueID, Maps.newHashMap(), inverted);
+	}
+
+	public ConfigValueCondition(String modid, String valueID) {
+		this(modid, valueID, false);
 	}
 
 	@Override
