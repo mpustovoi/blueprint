@@ -21,17 +21,21 @@ import java.util.List;
  * @author SmellyModder (Luke Tonon)
  */
 public final class BlueprintAndCondition implements ICondition {
-	private final ResourceLocation location;
+	private static final ResourceLocation NAME = new ResourceLocation(Blueprint.MOD_ID, "and");
 	private final List<ICondition> children;
 
+	@Deprecated
 	public BlueprintAndCondition(ResourceLocation location, List<ICondition> children) {
-		this.location = location;
+		this(children);
+	}
+
+	public BlueprintAndCondition(List<ICondition> children) {
 		this.children = children;
 	}
 
 	@Override
 	public ResourceLocation getID() {
-		return this.location;
+		return NAME;
 	}
 
 	@Override
@@ -70,12 +74,12 @@ public final class BlueprintAndCondition implements ICondition {
 					children.add(condition);
 				}
 			}
-			return new BlueprintAndCondition(this.location, children);
+			return new BlueprintAndCondition(children);
 		}
 
 		@Override
 		public ResourceLocation getID() {
-			return this.location;
+			return NAME;
 		}
 	}
 }
