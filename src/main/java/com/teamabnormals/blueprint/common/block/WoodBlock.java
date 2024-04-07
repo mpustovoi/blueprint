@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 /**
  * A {@link RotatedPillarBlock} extension that fills its item after the latest vanilla wood item.
  */
+@Deprecated
 public class WoodBlock extends RotatedPillarBlock {
 	private final Supplier<Block> block;
 
