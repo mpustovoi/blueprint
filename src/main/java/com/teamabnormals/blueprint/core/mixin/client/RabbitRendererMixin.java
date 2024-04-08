@@ -1,29 +1,26 @@
 package com.teamabnormals.blueprint.core.mixin.client;
 
-import com.teamabnormals.blueprint.core.api.BlueprintRabbitTypes;
-import com.teamabnormals.blueprint.core.api.BlueprintRabbitTypes.BlueprintRabbitType;
+import com.teamabnormals.blueprint.core.api.BlueprintRabbitVariants;
+import com.teamabnormals.blueprint.core.api.BlueprintRabbitVariants.BlueprintRabbitVariant;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.entity.RabbitRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Rabbit;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(RabbitRenderer.class)
 public abstract class RabbitRendererMixin {
-	@Shadow
-	@Final
-	private static ResourceLocation RABBIT_TOAST_LOCATION;
 
-	@Inject(method = "getTextureLocation(Lnet/minecraft/world/entity/animal/Rabbit;)Lnet/minecraft/resources/ResourceLocation;", at = @At("RETURN"), cancellable = true)
+	@Inject(method = "getTextureLocation(Lnet/minecraft/world/entity/animal/Rabbit;)Lnet/minecraft/resources/ResourceLocation;", at = @At("HEAD"), cancellable = true)
 	private void getTextureLocation(Rabbit rabbit, CallbackInfoReturnable<ResourceLocation> cir) {
-		if (!cir.getReturnValue().equals(RABBIT_TOAST_LOCATION)) {
-			for (BlueprintRabbitType rabbitType : BlueprintRabbitTypes.values()) {
-				if (rabbit.getVariant().id() == rabbitType.id()) {
-					cir.setReturnValue(rabbitType.textureLocation());
+		String s = ChatFormatting.stripFormatting(rabbit.getName().getString());
+		if (!"Toast".equals(s)) {
+			for (BlueprintRabbitVariant variant : BlueprintRabbitVariants.values()) {
+				if (rabbit.getVariant().id() == variant.id()) {
+					cir.setReturnValue(variant.textureLocation());
 					break;
 				}
 			}
