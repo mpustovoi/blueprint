@@ -51,12 +51,12 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		this.itemModels().withExistingParent(ForgeRegistries.ITEMS.getKey(item.asItem()).getPath(), "item/generated").texture("layer0", new ResourceLocation(ForgeRegistries.ITEMS.getKey(texture.asItem()).getNamespace(), type + "/" + ForgeRegistries.ITEMS.getKey(texture.asItem()).getPath()));
 	}
 
-	public void cubeBottomTop(RegistryObject<Block> block) {
+	public void cubeBottomTopBlock(RegistryObject<Block> block) {
 		ResourceLocation name = ForgeRegistries.BLOCKS.getKey(block.get());
-		this.cubeBottomTop(block, prefix("block/", suffix(name, "_side")), prefix("block/", suffix(name, "_bottom")), prefix("block/", suffix(name, "_top")));
+		this.cubeBottomTopBlock(block, prefix("block/", suffix(name, "_side")), prefix("block/", suffix(name, "_bottom")), prefix("block/", suffix(name, "_top")));
 	}
 
-	public void cubeBottomTop(RegistryObject<Block> block, ResourceLocation sideTexture, ResourceLocation bottomTexture, ResourceLocation topTexture) {
+	public void cubeBottomTopBlock(RegistryObject<Block> block, ResourceLocation sideTexture, ResourceLocation bottomTexture, ResourceLocation topTexture) {
 		this.simpleBlock(block.get(), this.models().cubeBottomTop(name(block.get()), sideTexture, bottomTexture, topTexture));
 		this.blockItem(block);
 	}
