@@ -1,5 +1,9 @@
 package com.teamabnormals.blueprint.core.data.client;
 
+import com.mojang.datafixers.util.Pair;
+import com.teamabnormals.blueprint.common.block.chest.BlueprintChestBlock;
+import com.teamabnormals.blueprint.common.block.sign.BlueprintCeilingHangingSignBlock;
+import com.teamabnormals.blueprint.common.block.sign.BlueprintWallHangingSignBlock;
 import com.teamabnormals.blueprint.core.Blueprint;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -61,13 +65,33 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		this.blockItem(block);
 	}
 
-	public void crossBlock(Block cross) {
-		this.simpleBlock(cross, models().cross(name(cross), blockTexture(cross)));
-		this.generatedItem(cross, "block");
+	public void directionalBlock(RegistryObject<Block> block, ResourceLocation sideTexture, ResourceLocation bottomTexture, ResourceLocation topTexture) {
+		this.directionalBlock(block.get(), models().cubeBottomTop(name(block.get()), sideTexture, bottomTexture, topTexture));
+		this.blockItem(block);
+	}
+
+	public void directionalBlock(RegistryObject<Block> block) {
+		ResourceLocation blockTexture = blockTexture(block.get());
+		this.directionalBlock(block, suffix(blockTexture, "_side"), suffix(blockTexture, "_bottom"), suffix(blockTexture, "_top"));
+	}
+
+	public void directionalBlockSharedSide(RegistryObject<Block> block, RegistryObject<Block> parent) {
+		ResourceLocation parentTexture = blockTexture(parent.get());
+		this.directionalBlock(block, suffix(parentTexture, "_side"), suffix(parentTexture, "_bottom"), suffix(blockTexture(block.get()), "_top"));
+	}
+
+	public void directionalBlockSharedBottom(RegistryObject<Block> block, RegistryObject<Block> parent) {
+		ResourceLocation blockTexture = blockTexture(block.get());
+		this.directionalBlock(block, suffix(blockTexture, "_side"), suffix(blockTexture(parent.get()), "_bottom"), suffix(blockTexture, "_top"));
+	}
+
+	public void crossBlock(RegistryObject<Block> cross) {
+		this.simpleBlock(cross.get(), models().cross(name(cross.get()), blockTexture(cross.get())));
+		this.generatedItem(cross.get(), "block");
 	}
 
 	public void crossBlockWithPot(RegistryObject<Block> cross, RegistryObject<Block> flowerPot, ResourceLocation potTexture) {
-		this.crossBlock(cross.get());
+		this.crossBlock(cross);
 		this.simpleBlock(flowerPot.get(), models().singleTexture(name(flowerPot.get()), new ResourceLocation("block/flower_pot_cross"), "plant", potTexture));
 	}
 
@@ -98,6 +122,14 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 			this.wallBlock(wallBlock, blockTexture(block));
 			this.itemModels().getBuilder(name(wall)).parent(this.models().wallInventory(name(wall) + "_inventory", blockTexture(block)));
 		}
+	}
+
+	public void baseBlocks(RegistryObject<Block> block, RegistryObject<Block> stairs, RegistryObject<Block> slab) {
+		this.baseBlocks(block.get(), stairs.get(), slab.get(), null);
+	}
+
+	public void baseBlocks(RegistryObject<Block> block, RegistryObject<Block> stairs, RegistryObject<Block> slab, RegistryObject<Block> wall) {
+		this.baseBlocks(block.get(), stairs.get(), slab.get(), wall.get());
 	}
 
 	public void baseBlocks(Block block, Block stairs, Block slab) {
@@ -158,7 +190,11 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		}
 	}
 
-	public void hangingSignBlocks(RegistryObject<Block> strippedLog, RegistryObject<Block> sign, RegistryObject<Block> wallSign) {
+	public void hangingSignBlocks(RegistryObject<Block> strippedLog, Pair<RegistryObject<BlueprintCeilingHangingSignBlock>, RegistryObject<BlueprintWallHangingSignBlock>> hangingSigns) {
+		this.hangingSignBlocks(strippedLog, hangingSigns.getFirst(), hangingSigns.getSecond());
+	}
+
+	public void hangingSignBlocks(RegistryObject<Block> strippedLog, RegistryObject<? extends Block> sign, RegistryObject<? extends Block> wallSign) {
 		ModelFile model = particle(sign, blockTexture(strippedLog.get()));
 		this.simpleBlock(sign.get(), model);
 		this.generatedItem(sign.get(), "item");
@@ -172,7 +208,7 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 	public void buttonBlock(Block block, ResourceLocation texture) {
 		ModelFile button = models().button(name(block), texture);
 		ModelFile buttonPressed = models().buttonPressed(name(block) + "_pressed", texture);
-		ModelFile buttonInventoryModel = models().buttonInventory(name(block) + "_inventory", blockTexture(block));
+		ModelFile buttonInventoryModel = models().buttonInventory(name(block) + "_inventory", texture);
 		if (block instanceof ButtonBlock buttonBlock) {
 			this.buttonBlock(buttonBlock, button, buttonPressed);
 		}
@@ -250,7 +286,7 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		this.generatedItem(ladder.get(), "block");
 	}
 
-	public void chestBlocks(RegistryObject<Block> planks, RegistryObject<Block> chest, RegistryObject<Block> trappedChest) {
+	public void chestBlocks(RegistryObject<Block> planks, RegistryObject<? extends Block> chest, RegistryObject<? extends Block> trappedChest) {
 		ModelFile model = particle(chest, blockTexture(planks.get()));
 		this.simpleBlock(chest.get(), model);
 		this.simpleBlock(trappedChest.get(), model);
@@ -268,16 +304,20 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 
 	public void logBlocks(RegistryObject<Block> log, RegistryObject<Block> wood) {
 		this.logBlock(log);
-		this.logBlock(wood, suffix(blockTexture(log.get()), "_top"));
+		this.woodBlock(wood, log);
+	}
+
+	public void woodBlock(RegistryObject<Block> block, RegistryObject<Block> log) {
+		this.logBlock(block, blockTexture(log.get()), blockTexture(log.get()));
 	}
 
 	public void logBlock(RegistryObject<Block> block) {
-		this.logBlock(block, suffix(blockTexture(block.get()), "_top"));
+		this.logBlock(block, blockTexture(block.get()), suffix(blockTexture(block.get()), "_top"));
 	}
 
-	public void logBlock(RegistryObject<Block> block, ResourceLocation topTexture) {
+	public void logBlock(RegistryObject<Block> block, ResourceLocation sideTexture, ResourceLocation topTexture) {
 		if (block.get() instanceof RotatedPillarBlock log) {
-			this.axisBlock(log, blockTexture(log), topTexture);
+			this.axisBlock(log, sideTexture, topTexture);
 			this.blockItem(block);
 		}
 	}
@@ -362,11 +402,21 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		});
 	}
 
+	public void brushableBlock(RegistryObject<Block> registryObject) {
+		Block block = registryObject.get();
+		ModelFile[] models = new ModelFile[4];
+		for (int i = 0; i < 4; i++) {
+			models[i] = this.models().cubeAll(name(block) + "_" + i, suffix(blockTexture(block), "_" + i));
+		}
+		this.getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder().modelFile(models[state.getValue(BlockStateProperties.DUSTED)]).build());
+		this.simpleBlockItem(block, models[0]);
+	}
+
 	public ModelFile particle(Block block, ResourceLocation texture) {
 		return this.models().getBuilder(name(block)).texture("particle", texture);
 	}
 
-	public ModelFile particle(RegistryObject<Block> block, ResourceLocation texture) {
+	public ModelFile particle(RegistryObject<? extends Block> block, ResourceLocation texture) {
 		return this.particle(block.get(), texture);
 	}
 
@@ -386,12 +436,12 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		return new ResourceLocation(rl.getNamespace(), rl.getPath().replace(remove, ""));
 	}
 
-	public void woodworksBlocks(RegistryObject<Block> planks, RegistryObject<Block> boards, RegistryObject<Block> ladder, RegistryObject<Block> beehive, RegistryObject<Block> chest, RegistryObject<Block> trappedChest, RegistryObject<Block> bookshelf) {
+	public void woodworksBlocks(RegistryObject<Block> planks, RegistryObject<Block> boards, RegistryObject<Block> ladder, RegistryObject<Block> bookshelf, RegistryObject<Block> beehive, RegistryObject<? extends Block> chest, RegistryObject<? extends Block> trappedChest) {
 		this.boardsBlock(boards);
 		this.ladderBlock(ladder);
 		this.beehiveBlock(beehive);
-		this.chestBlocks(planks, chest, trappedChest);
 		this.bookshelfBlock(planks, bookshelf);
+		this.chestBlocks(planks, chest, trappedChest);
 	}
 
 	public void blockFamily(BlockFamily family) {

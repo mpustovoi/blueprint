@@ -12,6 +12,7 @@ import net.minecraftforge.client.model.generators.ModelFile.UncheckedModelFile;
 import net.minecraftforge.client.model.generators.ModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 
 public abstract class BlueprintItemModelProvider extends ItemModelProvider {
@@ -20,48 +21,56 @@ public abstract class BlueprintItemModelProvider extends ItemModelProvider {
 		super(output, modid, helper);
 	}
 
-	public ItemModelBuilder item(ItemLike item, String type) {
-		return this.withExistingParent(name(item), "item/" + type).texture("layer0", itemTexture(item));
+	public ItemModelBuilder item(RegistryObject<? extends ItemLike> item, String type) {
+		return this.withExistingParent(name(item.get()), "item/" + type).texture("layer0", itemTexture(item.get()));
 	}
 
-	public ItemModelBuilder item(ItemLike item, String path, String type) {
-		return this.withExistingParent(name(item), "item/" + type).texture("layer0", new ResourceLocation(this.modid, "item/" + path));
+	public ItemModelBuilder item(RegistryObject<? extends ItemLike> item, String path, String type) {
+		return this.withExistingParent(name(item.get()), "item/" + type).texture("layer0", new ResourceLocation(this.modid, "item/" + path));
 	}
 
-	public ItemModelBuilder blockItem(Block block) {
-		return this.getBuilder(BlueprintBlockStateProvider.name(block)).parent(new UncheckedModelFile(new ResourceLocation(this.modid, "block/" + BlueprintBlockStateProvider.name(block))));
+	public ItemModelBuilder item(ResourceLocation location, String type) {
+		return this.withExistingParent(location.getPath(), "item/" + type).texture("layer0", new ResourceLocation(this.modid, "item/" + location.getPath()));
 	}
 
-	public void generatedItem(ItemLike... items) {
-		for (ItemLike item : items) {
+	public ItemModelBuilder blockItem(RegistryObject<Block> block) {
+		return this.getBuilder(BlueprintBlockStateProvider.name(block.get())).parent(new UncheckedModelFile(new ResourceLocation(this.modid, "block/" + BlueprintBlockStateProvider.name(block.get()))));
+	}
+
+	@SafeVarargs
+	public final void generatedItem(RegistryObject<? extends ItemLike>... items) {
+		for (RegistryObject<? extends ItemLike> item : items) {
 			this.item(item, "generated");
 		}
 	}
 
-	public void handheldItem(ItemLike... items) {
-		for (ItemLike item : items) {
+	@SafeVarargs
+	public final void handheldItem(RegistryObject<? extends ItemLike>... items) {
+		for (RegistryObject<? extends ItemLike> item : items) {
 			this.item(item, "handheld");
 		}
 	}
 
-	public void spawnEggItem(ItemLike... items) {
-		for (ItemLike item : items) {
-			this.withExistingParent(name(item), "item/template_spawn_egg");
+	@SafeVarargs
+	public final void spawnEggItem(RegistryObject<? extends ItemLike>... items) {
+		for (RegistryObject<? extends ItemLike> item : items) {
+			this.withExistingParent(name(item.get()), "item/template_spawn_egg");
 		}
 	}
 
-	public void animatedItem(ItemLike item, int count) {
+	public void animatedItem(RegistryObject<? extends ItemLike> item, int count) {
 		for (int i = 0; i < count; i++) {
-			String path = name(item) + "_" + String.format("%02d", i);
+			String path = name(item.get()) + "_" + String.format("%02d", i);
 			this.withExistingParent(path, "item/generated").texture("layer0", new ResourceLocation(this.modid, "item/" + path));
 		}
 	}
 
-	public void trimmableArmorItem(ItemLike... items) {
-		for (ItemLike item : items) {
-			if (item.asItem() instanceof ArmorItem armor) {
+	@SafeVarargs
+	public final void trimmableArmorItem(RegistryObject<? extends ItemLike>... items) {
+		for (RegistryObject<? extends ItemLike> item : items) {
+			if (item.get().asItem() instanceof ArmorItem armor) {
 				ResourceLocation location = ForgeRegistries.ITEMS.getKey(armor);
-				ItemModelBuilder itemModel = item(armor, "generated");
+				ItemModelBuilder itemModel = this.item(item, "generated");
 				int trimType = 1;
 				for (String trim : new String[]{"quartz", "iron", "netherite", "redstone", "copper", "gold", "emerald", "diamond", "lapis", "amethyst"}) {
 					ResourceLocation name = new ResourceLocation(location.getNamespace(), "item/" + location.getPath() + "_" + trim + "_trim");
