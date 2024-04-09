@@ -1,7 +1,6 @@
 package com.teamabnormals.blueprint.core.data.client;
 
 import com.mojang.datafixers.util.Pair;
-import com.teamabnormals.blueprint.common.block.chest.BlueprintChestBlock;
 import com.teamabnormals.blueprint.common.block.sign.BlueprintCeilingHangingSignBlock;
 import com.teamabnormals.blueprint.common.block.sign.BlueprintWallHangingSignBlock;
 import com.teamabnormals.blueprint.core.Blueprint;
@@ -52,7 +51,11 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 	}
 
 	public void generatedItem(ItemLike item, ItemLike texture, String type) {
-		this.itemModels().withExistingParent(ForgeRegistries.ITEMS.getKey(item.asItem()).getPath(), "item/generated").texture("layer0", new ResourceLocation(ForgeRegistries.ITEMS.getKey(texture.asItem()).getNamespace(), type + "/" + ForgeRegistries.ITEMS.getKey(texture.asItem()).getPath()));
+		this.generatedItem(item, prefix(type + "/", BlueprintItemModelProvider.key(texture)));
+	}
+
+	public void generatedItem(ItemLike item, ResourceLocation texture) {
+		this.itemModels().withExistingParent(ForgeRegistries.ITEMS.getKey(item.asItem()).getPath(), "item/generated").texture("layer0", texture);
 	}
 
 	public void cubeBottomTopBlock(RegistryObject<Block> block) {
@@ -237,14 +240,17 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 	}
 
 	public void bookshelfBlock(RegistryObject<Block> planks, RegistryObject<Block> bookshelf) {
-		this.simpleBlock(bookshelf.get(), this.models().cubeColumn(name(bookshelf.get()), blockTexture(bookshelf.get()), blockTexture(planks.get())));
+		this.bookshelfBlock(planks.get(), bookshelf);
+	}
+
+	public void bookshelfBlock(Block planks, RegistryObject<Block> bookshelf) {
+		this.simpleBlock(bookshelf.get(), this.models().cubeColumn(name(bookshelf.get()), blockTexture(bookshelf.get()), blockTexture(planks)));
 		this.blockItem(bookshelf);
 	}
 
 	public static final String[] DEFAULT_BOOKSHELF_POSITIONS = new String[]{"top_left", "top_mid", "top_right", "bottom_left", "bottom_mid", "bottom_right"};
 	public static final String[] ALTERNATE_BOOKSHELF_POSITIONS = new String[]{"top_left", "top_right", "mid_left", "mid_right", "bottom_left", "bottom_right"};
 	public static final String[] BOTTOM_BOOKSHELF_POSITIONS = new String[]{"top_left", "top_right", "bottom_left", "bottom_mid_left", "bottom_mid_right", "bottom_right"};
-	public static final String[] CHERRY_BOOKSHELF_POSITIONS = new String[]{"far_left", "mid_left", "top_mid", "bottom_mid", "mid_right", "far_right"};
 
 	public void chiseledBookshelfBlock(RegistryObject<Block> registryObject) {
 		chiseledBookshelfBlock(registryObject, DEFAULT_BOOKSHELF_POSITIONS, new ResourceLocation("template_chiseled_bookshelf"));
@@ -267,7 +273,7 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 			for (int i = 0; i < 6; i++) {
 				String part = parts[i];
 				BooleanProperty property = ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(i);
-				ResourceLocation slot = prefix("block/", suffix(parent, "_slot_" + part));
+				ResourceLocation slot = suffix(parent, "_slot_" + part);
 
 				builder.part().modelFile(this.models().withExistingParent(name + "_occupied_slot_" + part, slot).texture("texture", texture + "_occupied"))
 						.rotationY(rotation).uvLock(true).addModel()
@@ -282,12 +288,16 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 	}
 
 	public void ladderBlock(RegistryObject<Block> ladder) {
-		this.horizontalBlock(ladder.get(), models().withExistingParent(name(ladder.get()), "block/ladder").texture("particle", blockTexture(ladder.get())).texture("texture", blockTexture(ladder.get())));
+		this.horizontalBlock(ladder.get(), models().withExistingParent(name(ladder.get()), "block/ladder").texture("particle", blockTexture(ladder.get())).renderType("cutout").texture("texture", blockTexture(ladder.get())));
 		this.generatedItem(ladder.get(), "block");
 	}
 
 	public void chestBlocks(RegistryObject<Block> planks, RegistryObject<? extends Block> chest, RegistryObject<? extends Block> trappedChest) {
-		ModelFile model = particle(chest, blockTexture(planks.get()));
+		this.chestBlocks(planks.get(), chest, trappedChest);
+	}
+
+	public void chestBlocks(Block planks, RegistryObject<? extends Block> chest, RegistryObject<? extends Block> trappedChest) {
+		ModelFile model = particle(chest, blockTexture(planks));
 		this.simpleBlock(chest.get(), model);
 		this.simpleBlock(trappedChest.get(), model);
 		this.simpleBlockItem(chest.get(), new UncheckedModelFile(new ResourceLocation(Blueprint.MOD_ID, "item/template_chest")));
@@ -323,16 +333,28 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 	}
 
 	public void leavesBlock(RegistryObject<Block> leaves) {
-		this.simpleBlock(leaves.get(), models().getBuilder(name(leaves.get())).parent(new UncheckedModelFile(new ResourceLocation("block/leaves"))).texture("all", blockTexture(leaves.get())));
+		this.simpleBlock(leaves.get(), models().getBuilder(name(leaves.get())).parent(new UncheckedModelFile(new ResourceLocation("block/leaves"))).renderType("cutout_mipped").texture("all", blockTexture(leaves.get())));
 		this.blockItem(leaves);
 	}
 
 	public void leafPileBlock(RegistryObject<Block> leaves, RegistryObject<Block> leafPile) {
-		this.leafPileBlock(leaves, leafPile, true);
+		this.leafPileBlock(leaves.get(), leafPile, true);
 	}
 
 	public void leafPileBlock(RegistryObject<Block> leaves, RegistryObject<Block> leafPile, boolean tint) {
-		ModelFile leafPileModel = models().getBuilder(name(leafPile.get())).parent(new UncheckedModelFile(new ResourceLocation(Blueprint.MOD_ID, "block/" + (tint ? "tinted_" : "") + "leaf_pile"))).texture("all", blockTexture(leaves.get()));
+		this.leafPileBlock(leaves.get(), leafPile, tint);
+	}
+
+	public void leafPileBlock(Block leaves, RegistryObject<Block> leafPile) {
+		this.leafPileBlock(leaves, leafPile, true);
+	}
+
+	public void leafPileBlock(Block leaves, RegistryObject<Block> leafPile, boolean tint) {
+		this.leafPileBlock(leafPile, blockTexture(leaves), tint);
+	}
+
+	public void leafPileBlock(RegistryObject<Block> leafPile, ResourceLocation texture, boolean tint) {
+		ModelFile leafPileModel = models().getBuilder(name(leafPile.get())).parent(new UncheckedModelFile(new ResourceLocation(Blueprint.MOD_ID, "block/" + (tint ? "tinted_" : "") + "leaf_pile"))).renderType("cutout").texture("all", texture);
 		MultiPartBlockStateBuilder builder = getMultipartBuilder(leafPile.get());
 		builder.part().modelFile(leafPileModel).rotationX(270).uvLock(true).addModel().condition(BlockStateProperties.UP, true);
 		builder.part().modelFile(leafPileModel).rotationX(270).uvLock(true).addModel().condition(BlockStateProperties.UP, false).condition(BlockStateProperties.NORTH, false).condition(BlockStateProperties.WEST, false).condition(BlockStateProperties.SOUTH, false).condition(BlockStateProperties.EAST, false).condition(BlockStateProperties.DOWN, false);
@@ -346,7 +368,7 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		builder.part().modelFile(leafPileModel).rotationY(90).uvLock(true).addModel().condition(BlockStateProperties.UP, false).condition(BlockStateProperties.NORTH, false).condition(BlockStateProperties.WEST, false).condition(BlockStateProperties.SOUTH, false).condition(BlockStateProperties.EAST, false).condition(BlockStateProperties.DOWN, false);
 		builder.part().modelFile(leafPileModel).rotationX(90).uvLock(true).addModel().condition(BlockStateProperties.DOWN, true);
 		builder.part().modelFile(leafPileModel).rotationX(90).uvLock(true).addModel().condition(BlockStateProperties.UP, false).condition(BlockStateProperties.NORTH, false).condition(BlockStateProperties.WEST, false).condition(BlockStateProperties.SOUTH, false).condition(BlockStateProperties.EAST, false).condition(BlockStateProperties.DOWN, false);
-		this.generatedItem(leafPile.get(), leaves.get(), "block");
+		this.generatedItem(leafPile.get(), texture);
 	}
 
 	public void leavesBlocks(RegistryObject<Block> leaves, RegistryObject<Block> leafPile) {

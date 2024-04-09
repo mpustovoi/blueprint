@@ -92,7 +92,7 @@ public abstract class BlueprintItemModelProvider extends ItemModelProvider {
 		return key(item).getPath();
 	}
 
-	public ResourceLocation itemTexture(ItemLike item) {
+	public static ResourceLocation itemTexture(ItemLike item) {
 		ResourceLocation name = key(item);
 		return new ResourceLocation(name.getNamespace(), ModelProvider.ITEM_FOLDER + "/" + name.getPath());
 	}
