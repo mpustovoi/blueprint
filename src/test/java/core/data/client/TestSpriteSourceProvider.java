@@ -2,6 +2,7 @@ package core.data.client;
 
 import com.teamabnormals.blueprint.core.api.BlueprintTrims;
 import core.BlueprintTest;
+import core.registry.TestTrimMaterials;
 import core.registry.TestTrimPatterns;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -15,11 +16,10 @@ public final class TestSpriteSourceProvider extends SpriteSourceProvider {
 
 	@Override
 	protected void addSources() {
-		// TODO: Materials
 		this.atlas(BlueprintTrims.ARMOR_TRIMS_ATLAS)
 				.addSource(BlueprintTrims.patternPermutationsOfVanillaMaterials(TestTrimPatterns.PRIMAL))
-				.addSource(BlueprintTrims.materialPatternPermutations());
-		this.atlas(SpriteSourceProvider.BLOCKS_ATLAS).addSource(BlueprintTrims.materialPermutationsForItemLayers());
+				.addSource(BlueprintTrims.materialPatternPermutations(TestTrimMaterials.TEST));
+		this.atlas(SpriteSourceProvider.BLOCKS_ATLAS).addSource(BlueprintTrims.materialPermutationsForItemLayers(TestTrimMaterials.TEST));
 	}
 
 }

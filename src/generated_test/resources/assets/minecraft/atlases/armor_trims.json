@@ -27,7 +27,9 @@
     {
       "type": "blueprint:paletted_permutations",
       "palette_key": "minecraft:trims/color_palettes/trim_palette",
-      "permutations": {},
+      "permutations": {
+        "blueprint_test_test": "blueprint_test:trims/color_palettes/test"
+      },
       "sources": [
         {
           "type": "minecraft:directory",

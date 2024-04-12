@@ -31,6 +31,7 @@ public final class TestItemTagsProvider extends ItemTagsProvider {
 		this.tag(BlueprintItemTags.OCELOT_FOOD).add(Items.DIRT, Items.DIRT_PATH);
 		this.tag(BlueprintItemTags.CAT_FOOD).add(Items.APPLE);
 		this.tag(ItemTags.TRIM_TEMPLATES).add(TestItems.PRIMAL_ARMOR_TRIM_SMITHING_TEMPLATE.get());
+		this.tag(ItemTags.TRIM_MATERIALS).add(Items.FLOWERING_AZALEA);
 	}
 
 }

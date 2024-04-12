@@ -1,0 +1,9 @@
+{
+  "asset_name": "blueprint_test_test",
+  "description": {
+    "color": "#000000",
+    "translate": "trim_material.blueprint_test.test"
+  },
+  "ingredient": "minecraft:flowering_azalea",
+  "item_model_index": -1.0
+}

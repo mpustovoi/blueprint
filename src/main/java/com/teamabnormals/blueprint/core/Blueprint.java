@@ -9,7 +9,6 @@ import com.teamabnormals.blueprint.client.renderer.block.BlueprintChestBlockEnti
 import com.teamabnormals.blueprint.client.renderer.texture.atlas.BlueprintSpriteSources;
 import com.teamabnormals.blueprint.client.screen.splash.BlueprintSplashManager;
 import com.teamabnormals.blueprint.common.block.BlueprintChiseledBookShelfBlock;
-import com.teamabnormals.blueprint.common.block.chest.BlueprintChestBlock;
 import com.teamabnormals.blueprint.common.capability.chunkloading.ChunkLoaderCapability;
 import com.teamabnormals.blueprint.common.capability.chunkloading.ChunkLoaderEvents;
 import com.teamabnormals.blueprint.common.network.MessageC2SUpdateSlabfishHat;
@@ -22,6 +21,7 @@ import com.teamabnormals.blueprint.common.world.storage.tracking.DataProcessors;
 import com.teamabnormals.blueprint.common.world.storage.tracking.TrackedData;
 import com.teamabnormals.blueprint.common.world.storage.tracking.TrackedDataManager;
 import com.teamabnormals.blueprint.core.api.BlockSetTypeRegistryHelper;
+import com.teamabnormals.blueprint.core.api.BlueprintTrims;
 import com.teamabnormals.blueprint.core.api.WoodTypeRegistryHelper;
 import com.teamabnormals.blueprint.core.api.conditions.BlueprintAndCondition;
 import com.teamabnormals.blueprint.core.api.conditions.config.*;
@@ -158,6 +158,7 @@ public final class Blueprint {
 			bus.addListener(this::modelSetup);
 			bus.addListener(this::registerLayerDefinitions);
 			bus.addListener(this::rendererSetup);
+			bus.addListener(BlueprintTrims::onModelsBaked);
 			bus.addListener(CreativeModeTabContentsPopulator::onBuildCreativeModeTabContents);
 			bus.addListener(BlueprintSplashManager::onRegisterClientReloadListeners);
 			bus.addListener(RewardHandler::clientSetup);
@@ -191,7 +192,10 @@ public final class Blueprint {
 	}
 
 	private void clientSetup(FMLClientSetupEvent event) {
-		event.enqueueWork(WoodTypeRegistryHelper::setupAtlas);
+		event.enqueueWork(() -> {
+			WoodTypeRegistryHelper.setupAtlas();
+			BlueprintTrims.init();
+		});
 	}
 
 	private void dataSetup(GatherDataEvent event) {

@@ -12,6 +12,7 @@ import com.teamabnormals.blueprint.core.registry.BlueprintDataPackRegistries;
 import com.teamabnormals.blueprint.core.registry.BlueprintHolderSets;
 import com.teamabnormals.blueprint.core.util.BiomeUtil;
 import core.BlueprintTest;
+import core.registry.TestTrimMaterials;
 import core.registry.TestTrimPatterns;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
@@ -42,6 +43,7 @@ public final class TestDatapackBuiltinEntriesProvider extends DatapackBuiltinEnt
 			.add(Registries.BIOME, BlueprintDatapackBuiltinEntriesProvider::bootstrapBiomes)
 			.add(BlueprintDataPackRegistries.STRUCTURE_REPALETTERS, TestDatapackBuiltinEntriesProvider::bootstrapStructureRepaletters)
 			.add(BlueprintDataPackRegistries.MODDED_BIOME_SLICES, TestDatapackBuiltinEntriesProvider::bootstrapSlices)
+			.add(Registries.TRIM_MATERIAL, TestTrimMaterials::bootstrap)
 			.add(Registries.TRIM_PATTERN, TestTrimPatterns::bootstrap);
 
 	public TestDatapackBuiltinEntriesProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
