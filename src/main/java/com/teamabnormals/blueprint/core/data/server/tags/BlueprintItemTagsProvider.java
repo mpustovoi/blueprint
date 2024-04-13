@@ -53,11 +53,17 @@ public class BlueprintItemTagsProvider extends ItemTagsProvider {
 		this.tag(LARGE_BOATS);
 	}
 
-	public void copyWoodTags() {
-		this.copyWoodTags(false);
+	public void copyWoodsetTags() {
+		this.copyWoodenTags();
+		this.copyWoodworksTags();
+		this.copyLeavesTags();
 	}
 
-	public void copyWoodTags(boolean flammable) {
+	public void copyWoodenTags() {
+		this.copyWoodenTags(true);
+	}
+
+	public void copyWoodenTags(boolean flammable) {
 		this.copy(BlockTags.PLANKS, ItemTags.PLANKS);
 		this.copy(!flammable ? BlockTags.LOGS : BlockTags.LOGS_THAT_BURN, !flammable ? ItemTags.LOGS : ItemTags.LOGS_THAT_BURN);
 		this.copy(BlockTags.WOODEN_SLABS, ItemTags.WOODEN_SLABS);
@@ -83,7 +89,7 @@ public class BlueprintItemTagsProvider extends ItemTagsProvider {
 		this.copy(BlueprintBlockTags.WOODEN_CHISELED_BOOKSHELVES, WOODEN_CHISELED_BOOKSHELVES);
 	}
 
-	public void copyTreeTags() {
+	public void copyLeavesTags() {
 		this.copy(BlockTags.SAPLINGS, ItemTags.SAPLINGS);
 		this.copy(BlockTags.LEAVES, ItemTags.LEAVES);
 		this.copy(BlueprintBlockTags.LEAF_PILES, LEAF_PILES);
