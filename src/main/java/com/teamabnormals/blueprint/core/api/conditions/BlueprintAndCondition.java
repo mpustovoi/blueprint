@@ -33,6 +33,10 @@ public final class BlueprintAndCondition implements ICondition {
 		this.children = children;
 	}
 
+	public BlueprintAndCondition(ICondition... children) {
+		this(List.of(children));
+	}
+
 	@Override
 	public ResourceLocation getID() {
 		return NAME;

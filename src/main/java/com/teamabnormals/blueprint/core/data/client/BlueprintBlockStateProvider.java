@@ -2,7 +2,9 @@ package com.teamabnormals.blueprint.core.data.client;
 
 import com.mojang.datafixers.util.Pair;
 import com.teamabnormals.blueprint.common.block.sign.BlueprintCeilingHangingSignBlock;
+import com.teamabnormals.blueprint.common.block.sign.BlueprintStandingSignBlock;
 import com.teamabnormals.blueprint.common.block.sign.BlueprintWallHangingSignBlock;
+import com.teamabnormals.blueprint.common.block.sign.BlueprintWallSignBlock;
 import com.teamabnormals.blueprint.core.Blueprint;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -182,6 +184,10 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 	public void doorBlocks(Block door, Block trapdoor) {
 		this.doorBlock(door);
 		this.trapDoorBlock(trapdoor);
+	}
+
+	public void signBlocks(RegistryObject<Block> planks, Pair<RegistryObject<BlueprintStandingSignBlock>, RegistryObject<BlueprintWallSignBlock>> signs) {
+		this.hangingSignBlocks(planks, signs.getFirst(), signs.getSecond());
 	}
 
 	public void signBlocks(Block block, Block sign, Block wallSign) {
@@ -380,9 +386,9 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		this.leafPileBlock(leaves, leafPile, tinted);
 	}
 
-	public void ironBarsBlock(Block bars) {
-		this.ironBarsBlock(bars, blockTexture(bars));
-		this.generatedItem(bars, "block");
+	public void ironBarsBlock(RegistryObject<Block> bars) {
+		this.ironBarsBlock(bars.get(), blockTexture(bars.get()));
+		this.generatedItem(bars.get(), "block");
 	}
 
 	public void ironBarsBlock(Block block, ResourceLocation texture) {
@@ -458,12 +464,16 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		return new ResourceLocation(rl.getNamespace(), rl.getPath().replace(remove, ""));
 	}
 
-	public void woodworksBlocks(RegistryObject<Block> planks, RegistryObject<Block> boards, RegistryObject<Block> ladder, RegistryObject<Block> bookshelf, RegistryObject<Block> beehive, RegistryObject<? extends Block> chest, RegistryObject<? extends Block> trappedChest) {
+	public void woodworksBlocks(Block planks, RegistryObject<Block> boards, RegistryObject<Block> ladder, RegistryObject<Block> bookshelf, RegistryObject<Block> beehive, RegistryObject<? extends Block> chest, RegistryObject<? extends Block> trappedChest) {
 		this.boardsBlock(boards);
 		this.ladderBlock(ladder);
 		this.beehiveBlock(beehive);
 		this.bookshelfBlock(planks, bookshelf);
 		this.chestBlocks(planks, chest, trappedChest);
+	}
+
+	public void woodworksBlocks(RegistryObject<Block> planks, RegistryObject<Block> boards, RegistryObject<Block> ladder, RegistryObject<Block> bookshelf, RegistryObject<Block> beehive, RegistryObject<? extends Block> chest, RegistryObject<? extends Block> trappedChest) {
+		this.woodworksBlocks(planks.get(), boards, ladder, bookshelf, beehive, chest, trappedChest);
 	}
 
 	public void blockFamily(BlockFamily family) {

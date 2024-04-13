@@ -1,15 +1,20 @@
 package com.teamabnormals.blueprint.core.data.server.tags;
 
-import com.teamabnormals.blueprint.core.other.tags.BlueprintItemTags;
+import com.teamabnormals.blueprint.core.other.tags.BlueprintBlockTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.util.concurrent.CompletableFuture;
+
+import static com.teamabnormals.blueprint.core.other.tags.BlueprintItemTags.*;
 
 public class BlueprintItemTagsProvider extends ItemTagsProvider {
 
@@ -19,24 +24,68 @@ public class BlueprintItemTagsProvider extends ItemTagsProvider {
 
 	@Override
 	protected void addTags(HolderLookup.Provider p_256380_) {
-		this.tag(BlueprintItemTags.CHICKEN_FOOD);
-		this.tag(BlueprintItemTags.PIG_FOOD);
-		this.tag(BlueprintItemTags.STRIDER_FOOD);
-		this.tag(BlueprintItemTags.STRIDER_TEMPT_ITEMS);
-		this.tag(BlueprintItemTags.OCELOT_FOOD);
-		this.tag(BlueprintItemTags.CAT_FOOD);
+		this.tag(CHICKEN_FOOD);
+		this.tag(PIG_FOOD);
+		this.tag(STRIDER_FOOD);
+		this.tag(STRIDER_TEMPT_ITEMS);
+		this.tag(OCELOT_FOOD);
+		this.tag(CAT_FOOD);
 
-		this.tag(BlueprintItemTags.MILK).addTag(BlueprintItemTags.BUCKETS_MILK);
-		this.tag(BlueprintItemTags.PUMPKINS).add(Items.PUMPKIN);
+		this.tag(MILK).addTag(BUCKETS_MILK);
+		this.tag(PUMPKINS).add(Items.PUMPKIN);
 
-		this.tag(BlueprintItemTags.BUCKETS_EMPTY).add(Items.BUCKET);
-		this.tag(BlueprintItemTags.BUCKETS_WATER).add(Items.WATER_BUCKET);
-		this.tag(BlueprintItemTags.BUCKETS_LAVA).add(Items.LAVA_BUCKET);
-		this.tag(BlueprintItemTags.BUCKETS_MILK).add(Items.MILK_BUCKET);
-		this.tag(BlueprintItemTags.BUCKETS_POWDER_SNOW).add(Items.POWDER_SNOW_BUCKET);
-		this.tag(BlueprintItemTags.BUCKETS).addTag(BlueprintItemTags.BUCKETS_EMPTY).addTag(BlueprintItemTags.BUCKETS_WATER).addTag(BlueprintItemTags.BUCKETS_LAVA).addTag(BlueprintItemTags.BUCKETS_MILK).addTag(BlueprintItemTags.BUCKETS_LAVA);
+		this.tag(BUCKETS_EMPTY).add(Items.BUCKET);
+		this.tag(BUCKETS_WATER).add(Items.WATER_BUCKET);
+		this.tag(BUCKETS_LAVA).add(Items.LAVA_BUCKET);
+		this.tag(BUCKETS_MILK).add(Items.MILK_BUCKET);
+		this.tag(BUCKETS_POWDER_SNOW).add(Items.POWDER_SNOW_BUCKET);
+		this.tag(BUCKETS).addTag(BUCKETS_EMPTY).addTag(BUCKETS_WATER).addTag(BUCKETS_LAVA).addTag(BUCKETS_MILK).addTag(BUCKETS_LAVA);
 
-		this.tag(BlueprintItemTags.FURNACE_BOATS);
-		this.tag(BlueprintItemTags.LARGE_BOATS);
+		this.copyWoodworksTags();
+		this.copy(BlueprintBlockTags.LEAF_PILES, LEAF_PILES);
+
+		this.copy(Tags.Blocks.CHESTS_WOODEN, Tags.Items.CHESTS_WOODEN);
+		this.copy(Tags.Blocks.CHESTS_TRAPPED, Tags.Items.CHESTS_TRAPPED);
+		this.copy(Tags.Blocks.BOOKSHELVES, Tags.Items.BOOKSHELVES);
+		this.copy(BlueprintBlockTags.LADDERS, LADDERS);
+
+		this.tag(FURNACE_BOATS);
+		this.tag(LARGE_BOATS);
+	}
+
+	public void copyWoodTags() {
+		this.copyWoodTags(false);
+	}
+
+	public void copyWoodTags(boolean flammable) {
+		this.copy(BlockTags.PLANKS, ItemTags.PLANKS);
+		this.copy(!flammable ? BlockTags.LOGS : BlockTags.LOGS_THAT_BURN, !flammable ? ItemTags.LOGS : ItemTags.LOGS_THAT_BURN);
+		this.copy(BlockTags.WOODEN_SLABS, ItemTags.WOODEN_SLABS);
+		this.copy(BlockTags.WOODEN_STAIRS, ItemTags.WOODEN_STAIRS);
+		this.copy(BlockTags.WOODEN_FENCES, ItemTags.WOODEN_FENCES);
+		this.copy(BlockTags.FENCE_GATES, ItemTags.FENCE_GATES);
+		this.copy(BlockTags.WOODEN_DOORS, ItemTags.WOODEN_DOORS);
+		this.copy(BlockTags.WOODEN_TRAPDOORS, ItemTags.WOODEN_TRAPDOORS);
+		this.copy(BlockTags.WOODEN_BUTTONS, ItemTags.WOODEN_BUTTONS);
+		this.copy(BlockTags.WOODEN_PRESSURE_PLATES, ItemTags.WOODEN_PRESSURE_PLATES);
+
+		this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
+		this.copy(BlockTags.CEILING_HANGING_SIGNS, ItemTags.HANGING_SIGNS);
+	}
+
+	public void copyWoodworksTags() {
+		this.copy(BlueprintBlockTags.WOODEN_BOARDS, WOODEN_BOARDS);
+		this.copy(BlueprintBlockTags.WOODEN_CHESTS, WOODEN_CHESTS);
+		this.copy(BlueprintBlockTags.WOODEN_TRAPPED_CHESTS, WOODEN_TRAPPED_CHESTS);
+		this.copy(BlueprintBlockTags.WOODEN_LADDERS, WOODEN_LADDERS);
+		this.copy(BlueprintBlockTags.WOODEN_BEEHIVES, WOODEN_BEEHIVES);
+		this.copy(BlueprintBlockTags.WOODEN_BOOKSHELVES, WOODEN_BOOKSHELVES);
+		this.copy(BlueprintBlockTags.WOODEN_CHISELED_BOOKSHELVES, WOODEN_CHISELED_BOOKSHELVES);
+	}
+
+	public void copyTreeTags() {
+		this.copy(BlockTags.SAPLINGS, ItemTags.SAPLINGS);
+		this.copy(BlockTags.LEAVES, ItemTags.LEAVES);
+		this.copy(BlueprintBlockTags.LEAF_PILES, LEAF_PILES);
 	}
 }
