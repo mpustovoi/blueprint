@@ -26,6 +26,7 @@
     "WorldLoaderPackConfigMixin"
   ],
   "client": [
+    "client.ArmorTrimMixin",
     "client.CameraInvokerMixin",
     "client.ClientLevelMixin",
     "client.IntegratedServerMixin",

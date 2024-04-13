@@ -74,7 +74,7 @@ public class BlueprintTrims {
 	public static final ResourceLocation TRIM_TYPE_PREDICATE_ID = new ResourceLocation(Blueprint.MOD_ID, "trim_type");
 	private static final IdentityHashMap<ResourceKey<TrimMaterial>, Map<ArmorMaterial, String>> TRIM_MATERIAL_ARMOR_MATERIAL_OVERRIDES = new IdentityHashMap<>();
 	private static final LinkedHashMap<ResourceKey<TrimMaterial>, Pair<TrimMaterial, Float>> GENERATED_OVERRIDE_INDICES = new LinkedHashMap<>();
-	private static final ArrayList<Pair<ItemOverrides, ItemOverrides.BakedOverride[]>> REVERTIBLE_OVERRIDES = new ArrayList<>();
+	private static final ArrayList<RevertibleOverrides> REVERTIBLE_OVERRIDES = new ArrayList<>();
 
 	public static void init() {
 		ItemProperties.registerGeneric(TRIM_TYPE_PREDICATE_ID, (stack, level, entity, num) -> {
@@ -150,6 +150,10 @@ public class BlueprintTrims {
 	 */
 	public static synchronized void registerArmorMaterialOverrides(ResourceKey<TrimMaterial> key, Map<ArmorMaterial, String> overrideArmorMaterials) {
 		TRIM_MATERIAL_ARMOR_MATERIAL_OVERRIDES.put(key, overrideArmorMaterials);
+	}
+
+	public static Map<ArmorMaterial, String> getOverrideArmorMaterials(ResourceKey<TrimMaterial> key) {
+		return TRIM_MATERIAL_ARMOR_MATERIAL_OVERRIDES.get(key);
 	}
 
 	private static ModelResourceLocation generateModelLocation(String namespace, ResourceLocation itemName, String assetName, ArrayList<ItemOverride.Predicate> predicates) {
@@ -273,7 +277,7 @@ public class BlueprintTrims {
 				TrimMaterial trimMaterial = value.getFirst();
 				var trimMaterialKey = entry.getKey();
 				String trimMaterialNamespace = trimMaterialKey.location().getNamespace();
-				var armorMaterialOverrides = TRIM_MATERIAL_ARMOR_MATERIAL_OVERRIDES.get(trimMaterialKey);
+				var armorMaterialOverrides = getOverrideArmorMaterials(trimMaterialKey);
 				String assetName = armorMaterialOverrides != null ? armorMaterialOverrides.getOrDefault(armorMaterial, trimMaterial.assetName()) : trimMaterial.assetName();
 				float overrideIndex = value.getSecond();
 				ResourceLocation textureLocation = armorTrimTypeLocation.withSuffix("_" + assetName);
@@ -326,11 +330,12 @@ public class BlueprintTrims {
 			}
 			// Copy bakedOverridesToAdd from its end to i and insert it before the existing bakedModelOverrides.overrides
 			int bakedOverridesToAddLength = bakedOverridesToAdd.length;
-			ItemOverrides.BakedOverride[] newOverrides = new ItemOverrides.BakedOverride[overridesLength + bakedOverridesToAddLength - i];
-			System.arraycopy(bakedOverridesToAdd, i, newOverrides, 0, bakedOverridesToAddLength);
-			System.arraycopy(overrides, 0, newOverrides, i + 1, overridesLength);
+			int newBakedOverridesCount = bakedOverridesToAddLength - i;
+			ItemOverrides.BakedOverride[] newOverrides = new ItemOverrides.BakedOverride[overridesLength + newBakedOverridesCount];
+			System.arraycopy(bakedOverridesToAdd, i, newOverrides, 0, newBakedOverridesCount);
+			System.arraycopy(overrides, 0, newOverrides, newBakedOverridesCount, overridesLength);
 			bakedModelOverrides.overrides = newOverrides;
-			REVERTIBLE_OVERRIDES.add(Pair.of(bakedModelOverrides, overrides));
+			REVERTIBLE_OVERRIDES.add(new RevertibleOverrides(bakedModelOverrides, overrides, properties));
 		});
 	}
 
@@ -354,9 +359,7 @@ public class BlueprintTrims {
 	public static void onClientLoggingOutOfServer(ClientPlayerNetworkEvent.LoggingOut event) {
 		// Undo our override additions
 		for (int i = REVERTIBLE_OVERRIDES.size() - 1; i > -1; i--) {
-			var pair = REVERTIBLE_OVERRIDES.get(i);
-			REVERTIBLE_OVERRIDES.remove(i);
-			pair.getFirst().overrides = pair.getSecond();
+			REVERTIBLE_OVERRIDES.remove(i).revert();
 		}
 		GENERATED_OVERRIDE_INDICES.clear();
 	}
@@ -367,5 +370,13 @@ public class BlueprintTrims {
 		// Models reloaded after client joined a server
 		REVERTIBLE_OVERRIDES.clear();
 		modifyTrimmableItemModels(level.registryAccess());
+	}
+
+	private record RevertibleOverrides(ItemOverrides itemOverrides, ItemOverrides.BakedOverride[] overrides,
+									   ResourceLocation[] properties) {
+		private void revert() {
+			this.itemOverrides.overrides = this.overrides;
+			this.itemOverrides.properties = this.properties;
+		}
 	}
 }

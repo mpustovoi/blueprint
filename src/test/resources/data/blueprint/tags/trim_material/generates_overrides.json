@@ -1,5 +1,6 @@
 {
   "values": [
-    "blueprint_test:test"
+    "blueprint_test:test",
+    "minecraft:diamond"
   ]
 }

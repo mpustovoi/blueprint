@@ -8,6 +8,7 @@ import com.teamabnormals.blueprint.common.world.storage.tracking.DataProcessors;
 import com.teamabnormals.blueprint.common.world.storage.tracking.TrackedData;
 import com.teamabnormals.blueprint.common.world.storage.tracking.TrackedDataManager;
 import com.teamabnormals.blueprint.core.Blueprint;
+import com.teamabnormals.blueprint.core.api.BlueprintTrims;
 import com.teamabnormals.blueprint.core.events.AnimateTickEvents;
 import com.teamabnormals.blueprint.core.util.BiomeUtil;
 import com.teamabnormals.blueprint.core.util.DataUtil;
@@ -18,10 +19,7 @@ import core.data.client.TestEndimationProvider;
 import core.data.client.TestSplashProvider;
 import core.data.client.TestSpriteSourceProvider;
 import core.data.server.*;
-import core.registry.TestBlockEntities;
-import core.registry.TestEntities;
-import core.registry.TestFeatures;
-import core.registry.TestItems;
+import core.registry.*;
 import net.minecraft.client.renderer.entity.CowRenderer;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -33,6 +31,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
@@ -53,6 +52,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Mod(BlueprintTest.MOD_ID)
@@ -104,6 +104,7 @@ public final class BlueprintTest {
 		BiomeUtil.markEndBiomeCustomMusic(Biomes.ICE_SPIKES);
 		AnimateTickEvents.BLOCK.registerListener(TestEvents::onAnimateTick);
 		AnimateTickEvents.FLUID.registerListener(TestEvents::onFluidAnimateTick);
+		BlueprintTrims.registerArmorMaterialOverrides(TestTrimMaterials.TEST, Map.of(ArmorMaterials.IRON, "iron_darker"));
 	}
 
 	private void dataSetup(GatherDataEvent event) {
