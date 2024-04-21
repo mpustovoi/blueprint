@@ -44,45 +44,45 @@ public class BlueprintRecipeProvider extends RecipeProvider {
 		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, leaves).define('#', leafPile).pattern("##").pattern("##").group("leaves").unlockedBy(getHasName(leafPile), has(leafPile)).save(consumer, this.getModConversionRecipeName(leaves, leafPile));
 	}
 
-	public void stonecutterResultFromBaseMod(Consumer<FinishedRecipe> consumer, RecipeCategory category, ItemLike output, ItemLike input) {
-		stonecutterResultFromBase(consumer, category, output, input, 1);
+	public void stonecutterRecipe(Consumer<FinishedRecipe> consumer, RecipeCategory category, ItemLike output, ItemLike input) {
+		this.stonecutterRecipe(consumer, category, output, input, 1);
 	}
 
-	public void stonecutterResultFromBaseMod(Consumer<FinishedRecipe> consumer, RecipeCategory category, ItemLike output, ItemLike input, int count) {
+	public void stonecutterRecipe(Consumer<FinishedRecipe> consumer, RecipeCategory category, ItemLike output, ItemLike input, int count) {
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(input), category, output, count).unlockedBy(getHasName(input), has(input)).save(consumer, this.getModConversionRecipeName(output, input) + "_stonecutting");
 	}
 
-	public void oneToOneConversionRecipeMod(Consumer<FinishedRecipe> consumer, ItemLike output, ItemLike input, @Nullable String group) {
-		this.oneToOneConversionRecipeMod(consumer, output, input, group, 1);
+	public void conversionRecipe(Consumer<FinishedRecipe> consumer, ItemLike output, ItemLike input, @Nullable String group) {
+		this.conversionRecipe(consumer, output, input, group, 1);
 	}
 
-	public void oneToOneConversionRecipeMod(Consumer<FinishedRecipe> consumer, ItemLike output, ItemLike input, @Nullable String group, int count) {
-		oneToOneConversionRecipeBuilder(output, input, count).requires(input).group(group).unlockedBy(getHasName(input), has(input)).save(consumer, this.getModConversionRecipeName(output, input));
+	public void conversionRecipe(Consumer<FinishedRecipe> consumer, ItemLike output, ItemLike input, @Nullable String group, int count) {
+		conversionRecipeBuilder(output, input, count).group(group).save(consumer, this.getModConversionRecipeName(output, input));
 	}
 
-	public static ShapelessRecipeBuilder oneToOneConversionRecipeBuilder(ItemLike output, ItemLike input, int count) {
-		return oneToOneConversionRecipeBuilder(RecipeCategory.MISC, output, input, count);
+	public static ShapelessRecipeBuilder conversionRecipeBuilder(ItemLike output, ItemLike input, int count) {
+		return conversionRecipeBuilder(RecipeCategory.MISC, output, input, count);
 	}
 
-	public static ShapelessRecipeBuilder oneToOneConversionRecipeBuilder(RecipeCategory category, ItemLike output, ItemLike input, int count) {
+	public static ShapelessRecipeBuilder conversionRecipeBuilder(RecipeCategory category, ItemLike output, ItemLike input, int count) {
 		return ShapelessRecipeBuilder.shapeless(category, output, count).requires(input).unlockedBy(getHasName(input), has(input));
 	}
 
-	public void nineBlockStorageRecipesMod(Consumer<FinishedRecipe> consumer, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage) {
+	public void storageRecipes(Consumer<FinishedRecipe> consumer, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage) {
 		nineBlockStorageRecipes(consumer, itemCategory, item, storageCategory, storage, this.modid + ":" + getSimpleRecipeName(storage), null, this.modid + ":" + getSimpleRecipeName(item), null);
 	}
 
-	public void conditionalNineBlockStorageRecipes(Consumer<FinishedRecipe> consumer, ICondition condition, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage) {
-		conditionalNineBlockStorageRecipes(consumer, condition, itemCategory, item, storageCategory, storage, getSimpleRecipeName(storage), null, getSimpleRecipeName(item), null);
+	public void conditionalStorageRecipes(Consumer<FinishedRecipe> consumer, ICondition condition, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage) {
+		conditionalStorageRecipes(consumer, condition, itemCategory, item, storageCategory, storage, getSimpleRecipeName(storage), null, getSimpleRecipeName(item), null);
 	}
 
-	public void conditionalNineBlockStorageRecipes(Consumer<FinishedRecipe> consumer, ICondition condition, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage, String storageLocation, @Nullable String itemGroup, String itemLocation, @Nullable String storageGroup) {
+	public void conditionalStorageRecipes(Consumer<FinishedRecipe> consumer, ICondition condition, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage, String storageLocation, @Nullable String itemGroup, String itemLocation, @Nullable String storageGroup) {
 		conditionalRecipe(consumer, condition, itemCategory, ShapelessRecipeBuilder.shapeless(itemCategory, item, 9).requires(storage).group(storageGroup).unlockedBy(getHasName(storage), has(storage)), new ResourceLocation(this.modid, itemLocation));
 		conditionalRecipe(consumer, condition, storageCategory, ShapedRecipeBuilder.shaped(storageCategory, storage).define('#', item).pattern("###").pattern("###").pattern("###").group(itemGroup).unlockedBy(getHasName(item), has(item)), new ResourceLocation(this.modid, storageLocation));
 	}
 
-	public void conditionalNineBlockStorageRecipesWithCustomUnpacking(Consumer<FinishedRecipe> consumer, ICondition condition, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage, String shapelessName, String shapelessGroup) {
-		conditionalNineBlockStorageRecipes(consumer, condition, itemCategory, item, storageCategory, storage, getSimpleRecipeName(storage), null, shapelessName, shapelessGroup);
+	public void conditionalStorageRecipesWithCustomUnpacking(Consumer<FinishedRecipe> consumer, ICondition condition, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage, String shapelessName, String shapelessGroup) {
+		conditionalStorageRecipes(consumer, condition, itemCategory, item, storageCategory, storage, getSimpleRecipeName(storage), null, shapelessName, shapelessGroup);
 	}
 
 	public static void conditionalRecipe(Consumer<FinishedRecipe> consumer, ICondition condition, RecipeCategory category, RecipeBuilder recipe) {
