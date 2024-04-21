@@ -27,6 +27,7 @@ import com.teamabnormals.blueprint.core.api.conditions.BlueprintAndCondition;
 import com.teamabnormals.blueprint.core.api.conditions.config.*;
 import com.teamabnormals.blueprint.core.api.model.FullbrightModel;
 import com.teamabnormals.blueprint.core.data.server.BlueprintDatapackBuiltinEntriesProvider;
+import com.teamabnormals.blueprint.core.data.server.BlueprintRecipeProvider;
 import com.teamabnormals.blueprint.core.data.server.tags.*;
 import com.teamabnormals.blueprint.core.endimator.EndimationLoader;
 import com.teamabnormals.blueprint.core.other.BlueprintEvents;
@@ -200,18 +201,19 @@ public final class Blueprint {
 
 	private void dataSetup(GatherDataEvent event) {
 		DataGenerator generator = event.getGenerator();
-		PackOutput packOutput = generator.getPackOutput();
-		CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
-		ExistingFileHelper fileHelper = event.getExistingFileHelper();
+		PackOutput output = generator.getPackOutput();
+		CompletableFuture<HolderLookup.Provider> provider = event.getLookupProvider();
+		ExistingFileHelper helper = event.getExistingFileHelper();
 
-		boolean includeServer = event.includeServer();
-		BlueprintBlockTagsProvider blockTags = new BlueprintBlockTagsProvider(MOD_ID, packOutput, lookupProvider, fileHelper);
-		generator.addProvider(includeServer, blockTags);
-		generator.addProvider(includeServer, new BlueprintItemTagsProvider(MOD_ID, packOutput, lookupProvider, blockTags.contentsGetter(), fileHelper));
-		generator.addProvider(includeServer, new BlueprintEntityTypeTagsProvider(MOD_ID, packOutput, lookupProvider, fileHelper));
-		generator.addProvider(includeServer, new BlueprintBiomeTagsProvider(MOD_ID, packOutput, lookupProvider, fileHelper));
-		generator.addProvider(includeServer, new BlueprintPoiTypeTagsProvider(MOD_ID, packOutput, lookupProvider, fileHelper));
-		generator.addProvider(includeServer, new BlueprintDatapackBuiltinEntriesProvider(packOutput, lookupProvider));
+		boolean server = event.includeServer();
+		BlueprintBlockTagsProvider blockTags = new BlueprintBlockTagsProvider(MOD_ID, output, provider, helper);
+		generator.addProvider(server, blockTags);
+		generator.addProvider(server, new BlueprintItemTagsProvider(MOD_ID, output, provider, blockTags.contentsGetter(), helper));
+		generator.addProvider(server, new BlueprintEntityTypeTagsProvider(MOD_ID, output, provider, helper));
+		generator.addProvider(server, new BlueprintBiomeTagsProvider(MOD_ID, output, provider, helper));
+		generator.addProvider(server, new BlueprintPoiTypeTagsProvider(MOD_ID, output, provider, helper));
+		generator.addProvider(server, new BlueprintRecipeProvider(MOD_ID, output));
+		generator.addProvider(server, new BlueprintDatapackBuiltinEntriesProvider(output, provider));
 	}
 
 	private void registerOnEvent(RegisterEvent event) {
