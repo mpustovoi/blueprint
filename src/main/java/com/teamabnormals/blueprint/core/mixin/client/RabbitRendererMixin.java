@@ -19,7 +19,7 @@ public abstract class RabbitRendererMixin {
 		String s = ChatFormatting.stripFormatting(rabbit.getName().getString());
 		if (!"Toast".equals(s)) {
 			for (BlueprintRabbitVariant variant : BlueprintRabbitVariants.values()) {
-				if (rabbit.getVariant().id() == variant.id()) {
+				if (rabbit.getEntityData().get(Rabbit.DATA_TYPE_ID) == variant.id()) {
 					cir.setReturnValue(variant.textureLocation());
 					break;
 				}

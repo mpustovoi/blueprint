@@ -15,7 +15,7 @@
     "LootDataManagerMixin",
     "MinecraftServerMixin",
     "NoteBlockMixin",
-    "RabbitVariantMixin",
+    "RabbitMixin",
     "ReloadableServerResourcesMixin",
     "ServerEntityMixin",
     "ServerLevelMixin",
