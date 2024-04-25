@@ -8,7 +8,9 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.Tags;
@@ -16,6 +18,7 @@ import net.minecraftforge.common.crafting.ConditionalRecipe;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class BlueprintRecipeProvider extends RecipeProvider {
@@ -37,6 +40,30 @@ public class BlueprintRecipeProvider extends RecipeProvider {
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.FOOD, output, 0.35F, 200).unlockedBy(getHasName(input), has(input)).save(consumer);
 		SimpleCookingRecipeBuilder.smoking(Ingredient.of(input), RecipeCategory.FOOD, output, 0.35F, 100).unlockedBy(getHasName(input), has(input)).save(consumer, RecipeBuilder.getDefaultRecipeId(output) + "_from_smoking");
 		SimpleCookingRecipeBuilder.campfireCooking(Ingredient.of(input), RecipeCategory.FOOD, output, 0.35F, 600).unlockedBy(getHasName(input), has(input)).save(consumer, RecipeBuilder.getDefaultRecipeId(output) + "_from_campfire_cooking");
+	}
+
+
+	public void oreRecipes(Consumer<FinishedRecipe> consumer, List<ItemLike> inputs, RecipeCategory category, ItemLike output, float smeltingXp, int smeltingTime, String group) {
+		oreRecipes(consumer, inputs, category, output, smeltingXp, smeltingTime, smeltingXp, smeltingTime / 2, group);
+	}
+
+	public void oreRecipes(Consumer<FinishedRecipe> consumer, List<ItemLike> inputs, RecipeCategory category, ItemLike output, float smeltingXp, int smeltingTime, float blastingXp, int blastingTime, String group) {
+		smeltingRecipe(consumer, inputs, category, output, smeltingXp, smeltingTime, group);
+		blastingRecipe(consumer, inputs, category, output, blastingXp, blastingTime, group);
+	}
+
+	public void smeltingRecipe(Consumer<FinishedRecipe> consumer, List<ItemLike> inputs, RecipeCategory category, ItemLike output, float xp, int cookTime, String group) {
+		oreRecipe(consumer, RecipeSerializer.SMELTING_RECIPE, inputs, category, output, xp, cookTime, group, "_from_smelting");
+	}
+
+	public void blastingRecipe(Consumer<FinishedRecipe> consumer, List<ItemLike> p_176627_, RecipeCategory category, ItemLike output, float xp, int cookTime, String group) {
+		oreRecipe(consumer, RecipeSerializer.BLASTING_RECIPE, p_176627_, category, output, xp, cookTime, group, "_from_blasting");
+	}
+
+	public void oreRecipe(Consumer<FinishedRecipe> consumer, RecipeSerializer<? extends AbstractCookingRecipe> recipeSerializer, List<ItemLike> inputs, RecipeCategory category, ItemLike output, float xp, int cookTime, String p_176540_, String suffix) {
+		for (ItemLike itemlike : inputs) {
+			SimpleCookingRecipeBuilder.generic(Ingredient.of(itemlike), category, output, xp, cookTime, recipeSerializer).group(p_176540_).unlockedBy(getHasName(itemlike), has(itemlike)).save(consumer, new ResourceLocation(this.modid, getItemName(output) + suffix + "_" + getItemName(itemlike)));
+		}
 	}
 
 	public void leafPileRecipes(Consumer<FinishedRecipe> consumer, ItemLike leaves, ItemLike leafPile) {
@@ -68,8 +95,20 @@ public class BlueprintRecipeProvider extends RecipeProvider {
 		return ShapelessRecipeBuilder.shapeless(category, output, count).requires(input).unlockedBy(getHasName(input), has(input));
 	}
 
+	public void storageRecipes(Consumer<FinishedRecipe> consumer, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage, String storageName, String storageGroup, String itemName, String itemGroup) {
+		nineBlockStorageRecipes(consumer, itemCategory, item, storageCategory, storage, this.modid + ":" + storageName, storageGroup, this.modid + ":" + itemName, itemGroup);
+	}
+
 	public void storageRecipes(Consumer<FinishedRecipe> consumer, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage) {
-		nineBlockStorageRecipes(consumer, itemCategory, item, storageCategory, storage, this.modid + ":" + getSimpleRecipeName(storage), null, this.modid + ":" + getSimpleRecipeName(item), null);
+		storageRecipes(consumer, itemCategory, item, storageCategory, storage, getSimpleRecipeName(storage), null, getSimpleRecipeName(item), null);
+	}
+
+	public void storageRecipesWithCustomPacking(Consumer<FinishedRecipe> consumer, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage, String storageName, String storageGroup) {
+		storageRecipes(consumer, itemCategory, item, storageCategory, storage, storageName, storageGroup, getSimpleRecipeName(item), null);
+	}
+
+	public void storageRecipesWithCustomUnpacking(Consumer<FinishedRecipe> consumer, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage, String itemName, String itemGroup) {
+		storageRecipes(consumer, itemCategory, item, storageCategory, storage, getSimpleRecipeName(storage), null, itemName, itemGroup);
 	}
 
 	public void conditionalStorageRecipes(Consumer<FinishedRecipe> consumer, ICondition condition, RecipeCategory itemCategory, ItemLike item, RecipeCategory storageCategory, ItemLike storage) {
@@ -93,6 +132,14 @@ public class BlueprintRecipeProvider extends RecipeProvider {
 		ConditionalRecipe.builder().addCondition(condition).addRecipe(consumer1 -> recipe.save(consumer1, id)).generateAdvancement(new ResourceLocation(id.getNamespace(), "recipes/" + category.getFolderName() + "/" + id.getPath())).build(consumer, id);
 	}
 
+	public void waxRecipe(Consumer<FinishedRecipe> consumer, RecipeCategory category, ItemLike input, ItemLike result) {
+		ShapelessRecipeBuilder.shapeless(category, result).requires(input).requires(Items.HONEYCOMB).group(getItemName(result)).unlockedBy(getHasName(input), has(input)).save(consumer, this.getModConversionRecipeName(result, Items.HONEYCOMB));
+	}
+
+	public void netheriteSmithingRecipe(Consumer<FinishedRecipe> consumer, Item input, RecipeCategory category, Item output) {
+		SmithingTransformRecipeBuilder.smithing(Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(input), Ingredient.of(Items.NETHERITE_INGOT), category, output).unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT)).save(consumer, new ResourceLocation(this.modid, getItemName(output) + "_smithing"));
+	}
+
 	public static void trimSmithing(Consumer<FinishedRecipe> consumer, ItemLike item) {
 		SmithingTrimRecipeBuilder.smithingTrim(Ingredient.of(item), Ingredient.of(ItemTags.TRIMMABLE_ARMOR), Ingredient.of(ItemTags.TRIM_MATERIALS), RecipeCategory.MISC).unlocks("has_smithing_trim_template", has(item)).save(consumer, suffix(RecipeBuilder.getDefaultRecipeId(item), "_smithing_trim"));
 	}
@@ -113,5 +160,9 @@ public class BlueprintRecipeProvider extends RecipeProvider {
 
 	public ResourceLocation getModConversionRecipeName(ItemLike output, ItemLike input) {
 		return new ResourceLocation(this.modid, getConversionRecipeName(output, input));
+	}
+
+	public String getModID() {
+		return this.modid;
 	}
 }

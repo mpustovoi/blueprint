@@ -70,6 +70,16 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 		this.blockItem(block);
 	}
 
+	public void cubeColumnBlock(RegistryObject<Block> block) {
+		ResourceLocation name = ForgeRegistries.BLOCKS.getKey(block.get());
+		this.cubeColumnBlock(block, prefix("block/", name), prefix("block/", suffix(name, "_top")));
+	}
+
+	public void cubeColumnBlock(RegistryObject<Block> block, ResourceLocation sideTexture, ResourceLocation topTexture) {
+		this.simpleBlock(block.get(), this.models().cubeColumn(name(block.get()), sideTexture, topTexture));
+		this.blockItem(block);
+	}
+
 	public void directionalBlock(RegistryObject<Block> block, ResourceLocation sideTexture, ResourceLocation bottomTexture, ResourceLocation topTexture) {
 		this.directionalBlock(block.get(), models().cubeBottomTop(name(block.get()), sideTexture, bottomTexture, topTexture));
 		this.blockItem(block);
@@ -477,29 +487,12 @@ public abstract class BlueprintBlockStateProvider extends BlockStateProvider {
 	}
 
 	public void blockFamily(BlockFamily family) {
-		Map<Variant, Block> variants = family.getVariants();
 		Block block = family.getBaseBlock();
 
 		this.baseBlocks(block, family.get(Variant.STAIRS), family.get(Variant.SLAB), family.get(Variant.WALL));
 		this.fenceBlocks(block, family.get(Variant.FENCE), family.get(Variant.FENCE_GATE));
 		this.doorBlocks(family.get(Variant.DOOR), family.get(Variant.TRAPDOOR));
 		this.signBlocks(block, family.get(Variant.SIGN), family.get(Variant.WALL_SIGN));
-
-		if (variants.containsKey(Variant.CHISELED)) {
-			this.block(family.get(Variant.CHISELED));
-		}
-
-		if (variants.containsKey(Variant.CRACKED)) {
-			this.block(family.get(Variant.POLISHED));
-		}
-
-		if (variants.containsKey(Variant.CUT)) {
-			this.block(family.get(Variant.POLISHED));
-		}
-
-		if (variants.containsKey(Variant.POLISHED)) {
-			this.block(family.get(Variant.POLISHED));
-		}
 
 		if (family.get(Variant.BUTTON) instanceof ButtonBlock button) {
 			this.buttonBlock(block, button);
