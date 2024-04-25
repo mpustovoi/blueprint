@@ -20,5 +20,4 @@ public class BlueprintEntityTypeTagsProvider extends EntityTypeTagsProvider {
 		this.tag(BlueprintEntityTypeTags.FISHES).add(EntityType.COD, EntityType.SALMON, EntityType.PUFFERFISH, EntityType.TROPICAL_FISH);
 		this.tag(BlueprintEntityTypeTags.MILKABLE).add(EntityType.COW, EntityType.MOOSHROOM, EntityType.GOAT);
 	}
-
 }

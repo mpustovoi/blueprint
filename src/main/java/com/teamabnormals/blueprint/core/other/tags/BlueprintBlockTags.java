@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.Block;
 public class BlueprintBlockTags {
 	public static final TagKey<Block> LADDERS = TagUtil.blockTag("forge", "ladders");
 
-	public static final TagKey<Block> NOTE_BLOCK_TOP_INSTRUMENTS = TagUtil.blockTag(Blueprint.MOD_ID, "noteblock_top_instruments");
+	public static final TagKey<Block> NOTE_BLOCK_TOP_INSTRUMENTS = blockTag("noteblock_top_instruments");
 
 	public static final TagKey<Block> WOODEN_CHESTS = blockTag("wooden_chests");
 	public static final TagKey<Block> WOODEN_TRAPPED_CHESTS = blockTag("wooden_trapped_chests");

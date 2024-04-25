@@ -3,10 +3,12 @@ package com.teamabnormals.blueprint.core.util;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -52,6 +54,14 @@ public final class TagUtil {
 
 	public static TagKey<MobEffect> mobEffectTag(String modid, String name) {
 		return TagKey.create(Registries.MOB_EFFECT, new ResourceLocation(modid, name));
+	}
+
+	public static TagKey<DamageType> damageTypeTag(String modid, String name) {
+		return TagKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(modid, name));
+	}
+
+	public static TagKey<TrimMaterial> trimMaterialTag(String modid, String name) {
+		return TagKey.create(Registries.TRIM_MATERIAL, new ResourceLocation(modid, name));
 	}
 
 	public static TagKey<Biome> biomeTag(String modid, String name) {
