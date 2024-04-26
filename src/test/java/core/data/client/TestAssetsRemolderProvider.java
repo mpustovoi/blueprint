@@ -1,8 +1,8 @@
 package core.data.client;
 
+import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import com.teamabnormals.blueprint.common.remolder.data.RemolderProvider;
-import com.teamabnormals.blueprint.core.util.modification.selection.selectors.NamesResourceSelector;
 import core.BlueprintTest;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -28,7 +28,7 @@ public final class TestAssetsRemolderProvider extends RemolderProvider {
 				));
 		this.entry("rotate_acacia_planks_blockstate")
 				.path("minecraft:blockstates/acacia_planks")
-				.pack(new NamesResourceSelector("minecraft:vanilla"))
+				.pack(Sets.newHashSet("vanilla"))
 				.remolder(add(
 						target("variants.get(\"\").x"),
 						target("data(90)")

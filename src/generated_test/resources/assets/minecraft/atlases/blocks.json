@@ -7,9 +7,9 @@
         "blueprint_test_test": "blueprint_test:trims/color_palettes/test"
       },
       "textures": [
-        "minecraft:trims/items/leggings_trim",
-        "minecraft:trims/items/chestplate_trim",
         "minecraft:trims/items/helmet_trim",
+        "minecraft:trims/items/chestplate_trim",
+        "minecraft:trims/items/leggings_trim",
         "minecraft:trims/items/boots_trim"
       ]
     }

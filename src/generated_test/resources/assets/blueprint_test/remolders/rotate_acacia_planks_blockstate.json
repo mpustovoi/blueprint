@@ -1,6 +1,8 @@
 {
   "molding": "json",
-  "pack_selector": "minecraft:vanilla",
+  "packs": [
+    "vanilla"
+  ],
   "remolder": {
     "type": "add",
     "expressed_value": "data(90)",

@@ -129,11 +129,13 @@ public final class RemoldedResourceManager implements CloseableResourceManager {
 							});
 							var either = pathSelector.select();
 							var locations = either.left();
+							var packs = remolderEntry.packs();
 							if (locations.isPresent()) {
 								var directRemoldings = entries.getFirst();
-								locations.get().forEach(location -> directRemoldings.computeIfAbsent(location.toString(), __ -> new ArrayList<>()).add(new Entry(ResourceSelector.predicate(remolderEntry.packSelector()), remolding)));
+								Entry remoldingEntry = new Entry(packs == null ? s -> true : packs::contains, remolding);
+								locations.get().forEach(location -> directRemoldings.computeIfAbsent(location.toString(), __ -> new ArrayList<>()).add(remoldingEntry));
 							} else
-								entries.getSecond().add(Pair.of(either.right().get(), new Entry(ResourceSelector.predicate(remolderEntry.packSelector()), remolding)));
+								entries.getSecond().add(Pair.of(either.right().get(), new Entry(packs == null ? s -> true : packs::contains, remolding)));
 						}
 					}
 					successfulCount.getAndIncrement();
@@ -156,19 +158,22 @@ public final class RemoldedResourceManager implements CloseableResourceManager {
 			var entriesForExtension = this.fileExtensionToEntries.get(extension);
 			if (entriesForExtension != null) {
 				String locationWithoutExtension = locationString.substring(0, lastIndexOfDot);
+				ResourceLocation resourceLocationWithoutExtension = new ResourceLocation(locationWithoutExtension);
+				boolean foundNone = true;
 				Pair<MoldingTypes.MoldingType<?>, List<Entry>>[] typeEntries = new Pair[entriesForExtension.size()];
 				int i = 0;
-				boolean foundNone = true;
 				for (var entry : entriesForExtension.entrySet()) {
 					var value = entry.getValue();
+					var indirectRemolders = value.getSecond();
 					var entriesForLocation = value.getFirst().get(locationWithoutExtension);
-					ResourceLocation resourceLocationWithoutExtension = new ResourceLocation(locationWithoutExtension);
-					for (var filterAndRemolding : value.getSecond()) {
-						if (!filterAndRemolding.getFirst().test(resourceLocationWithoutExtension)) continue;
-						if (entriesForLocation == null) entriesForLocation = new ArrayList<>();
-						entriesForLocation.add(filterAndRemolding.getSecond());
-					}
-					if (entriesForLocation == null || entriesForLocation.isEmpty()) continue;
+					if (!indirectRemolders.isEmpty()) {
+						entriesForLocation = entriesForLocation == null ? new ArrayList<>() : new ArrayList<>(entriesForLocation);
+						for (var filterAndRemolding : indirectRemolders) {
+							if (!filterAndRemolding.getFirst().test(resourceLocationWithoutExtension)) continue;
+							entriesForLocation.add(filterAndRemolding.getSecond());
+						}
+						if (entriesForLocation.isEmpty()) continue;
+					} else if (entriesForLocation == null) continue;
 					foundNone = false;
 					typeEntries[i++] = Pair.of(entry.getKey(), entriesForLocation);
 				}
@@ -257,9 +262,9 @@ public final class RemoldedResourceManager implements CloseableResourceManager {
 	}
 
 	/**
-	 * Record class for storing a loaded remolder's pack selector and remolding.
+	 * Record class for storing a loaded remolder's pack filter and remolding.
 	 *
 	 * @author SmellyModder (Luke Tonon)
 	 */
-	public record Entry(Predicate<ResourceLocation> packSelector, Remolding<?> remolding) {}
+	public record Entry(Predicate<String> packFilter, Remolding<?> remolding) {}
 }

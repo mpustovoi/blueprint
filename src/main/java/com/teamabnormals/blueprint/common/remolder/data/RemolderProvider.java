@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -81,7 +82,7 @@ public abstract class RemolderProvider implements DataProvider {
 			return CompletableFuture.allOf(entries.stream().map(entry -> {
 				Path resolvedPath = pathProvider.json(entry.name);
 				try {
-					var dataResult = RemolderEntry.CODEC.encodeStart(registryOps, new RemolderEntry(entry.pathSelector, entry.packSelector, entry.molding, entry.remolder));
+					var dataResult = RemolderEntry.CODEC.encodeStart(registryOps, new RemolderEntry(entry.pathSelector, entry.packs, entry.molding, entry.remolder));
 					var error = dataResult.error();
 					if (error.isPresent()) throw new JsonParseException(error.get().message());
 					return DataProvider.saveStable(output, dataResult.result().get(), resolvedPath);
@@ -107,7 +108,7 @@ public abstract class RemolderProvider implements DataProvider {
 		private final ResourceLocation name;
 		private ConditionedResourceSelector pathSelector = ConditionedResourceSelector.EMPTY;
 		@Nullable
-		private ResourceSelector<?> packSelector = null;
+		private Set<String> packs = null;
 		private MoldingTypes.MoldingType<?> molding = MoldingTypes.JSON;
 		private Remolder remolder = RemolderTypes.noop();
 
@@ -147,13 +148,13 @@ public abstract class RemolderProvider implements DataProvider {
 		}
 
 		/**
-		 * Changes the {@link ResourceSelector} instance used for selecting which packs to target.
+		 * Changes the set used for selecting which packs to target.
 		 *
-		 * @param selector A new {@link ResourceSelector} instance to use for selecting valid packs.
+		 * @param packs A new set of pack ids to use for selecting valid packs.
 		 * @return This entry.
 		 */
-		public Entry pack(ResourceSelector<?> selector) {
-			this.packSelector = selector;
+		public Entry pack(Set<String> packs) {
+			this.packs = packs;
 			return this;
 		}
 

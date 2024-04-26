@@ -9,7 +9,6 @@ import com.teamabnormals.blueprint.common.remolder.RemoldedResourceManager;
 import com.teamabnormals.blueprint.common.remolder.Remolding;
 import com.teamabnormals.blueprint.core.Blueprint;
 import com.teamabnormals.blueprint.core.util.registry.BasicRegistry;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceMetadata;
@@ -82,12 +81,12 @@ public final class MoldingTypes {
 		public Resource remold(String location, Resource resource, List<RemoldedResourceManager.Entry> entries) {
 			T root = this.deserializer().apply(resource);
 			if (root == null) return resource;
-			ResourceLocation pack = new ResourceLocation(resource.sourcePackId());
+			String pack = resource.sourcePackId();
 			DynamicOps<T> ops = this.ops;
 			T metadata = getMetadata(resource, ops);
 			Pair<T, T> result;
 			for (RemoldedResourceManager.Entry entry : entries) {
-				if (!entry.packSelector().test(pack)) continue;
+				if (!entry.packFilter().test(pack)) continue;
 				try {
 					result = ((Remolding<T>) entry.remolding()).apply(ops, root, metadata, ops.emptyMap());
 				} catch (Exception exception) {
