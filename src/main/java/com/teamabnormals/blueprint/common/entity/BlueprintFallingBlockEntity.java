@@ -4,11 +4,8 @@ import com.teamabnormals.blueprint.common.block.BlueprintFallingBlock;
 import com.teamabnormals.blueprint.core.events.FallingBlockEvent;
 import com.teamabnormals.blueprint.core.registry.BlueprintEntityTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
@@ -29,9 +26,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.network.PlayMessages;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +34,7 @@ import org.apache.logging.log4j.Logger;
  * A {@link FallingBlockEntity} extension with some additional attributes.
  * The entity is spawned when a {@link BlueprintFallingBlock} falls.
  */
-public class BlueprintFallingBlockEntity extends FallingBlockEntity implements IEntityAdditionalSpawnData {
+public class BlueprintFallingBlockEntity extends FallingBlockEntity implements IEntityWithComplexSpawn {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private boolean dropsBlockLoot = true;
 	private boolean allowsPlacing = true;
@@ -58,10 +53,6 @@ public class BlueprintFallingBlockEntity extends FallingBlockEntity implements I
 		this.yo = y;
 		this.zo = z;
 		this.setStartPos(this.blockPosition());
-	}
-
-	public BlueprintFallingBlockEntity(PlayMessages.SpawnEntity spawnEntity, Level level) {
-		this(BlueprintEntityTypes.FALLING_BLOCK.get(), level);
 	}
 
 	public static BlueprintFallingBlockEntity fall(Level level, BlockPos pos, BlockState state) {
@@ -223,17 +214,12 @@ public class BlueprintFallingBlockEntity extends FallingBlockEntity implements I
 	}
 
 	@Override
-	public Packet<ClientGamePacketListener> getAddEntityPacket() {
-		return NetworkHooks.getEntitySpawningPacket(this);
-	}
-
-	@Override
-	public void writeSpawnData(FriendlyByteBuf buffer) {
+	public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
 		buffer.writeInt(Block.getId(this.blockState));
 	}
 
 	@Override
-	public void readSpawnData(FriendlyByteBuf buffer) {
+	public void readSpawnData(RegistryFriendlyByteBuf buffer) {
 		this.blockState = Block.stateById(buffer.readInt());
 	}
 }

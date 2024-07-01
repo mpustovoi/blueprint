@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.teamabnormals.blueprint.common.codec.NullableFieldCodec;
 import com.teamabnormals.blueprint.core.Blueprint;
@@ -42,23 +43,23 @@ import java.util.stream.Collectors;
  */
 public final class BiomeUtil {
 	private static final Set<ResourceKey<Biome>> CUSTOM_END_MUSIC_BIOMES = new HashSet<>();
-	private static final BasicRegistry<Codec<? extends ModdedBiomeProvider>> MODDED_PROVIDERS = new BasicRegistry<>();
+	private static final BasicRegistry<MapCodec<? extends ModdedBiomeProvider>> MODDED_PROVIDERS = new BasicRegistry<>();
 	public static final Codec<ResourceKey<Biome>> BIOME_KEY_CODEC = ResourceKey.codec(Registries.BIOME);
 
 	static {
-		MODDED_PROVIDERS.register(new ResourceLocation(Blueprint.MOD_ID, "original"), BiomeUtil.OriginalModdedBiomeProvider.CODEC);
-		MODDED_PROVIDERS.register(new ResourceLocation(Blueprint.MOD_ID, "multi_noise"), BiomeUtil.MultiNoiseModdedBiomeProvider.CODEC);
-		MODDED_PROVIDERS.register(new ResourceLocation(Blueprint.MOD_ID, "overlay"), BiomeUtil.OverlayModdedBiomeProvider.CODEC);
-		MODDED_PROVIDERS.register(new ResourceLocation(Blueprint.MOD_ID, "biome_source"), BiomeUtil.BiomeSourceModdedBiomeProvider.CODEC);
+		MODDED_PROVIDERS.register(ResourceLocation.fromNamespaceAndPath(Blueprint.MOD_ID, "original"), BiomeUtil.OriginalModdedBiomeProvider.CODEC);
+		MODDED_PROVIDERS.register(ResourceLocation.fromNamespaceAndPath(Blueprint.MOD_ID, "multi_noise"), BiomeUtil.MultiNoiseModdedBiomeProvider.CODEC);
+		MODDED_PROVIDERS.register(ResourceLocation.fromNamespaceAndPath(Blueprint.MOD_ID, "overlay"), BiomeUtil.OverlayModdedBiomeProvider.CODEC);
+		MODDED_PROVIDERS.register(ResourceLocation.fromNamespaceAndPath(Blueprint.MOD_ID, "biome_source"), BiomeUtil.BiomeSourceModdedBiomeProvider.CODEC);
 	}
 
 	/**
 	 * Registers a new {@link ModdedBiomeProvider} type that can be serialized and deserialized.
 	 *
 	 * @param name  A {@link ResourceLocation} name for the provider.
-	 * @param codec A {@link Codec} to use for serializing and deserializing instances of the {@link ModdedBiomeProvider} type.
+	 * @param codec A {@link MapCodec} to use for serializing and deserializing instances of the {@link ModdedBiomeProvider} type.
 	 */
-	public static synchronized void registerBiomeProvider(ResourceLocation name, Codec<? extends ModdedBiomeProvider> codec) {
+	public static synchronized void registerBiomeProvider(ResourceLocation name, MapCodec<? extends ModdedBiomeProvider> codec) {
 		MODDED_PROVIDERS.register(name, codec);
 	}
 
@@ -115,11 +116,11 @@ public final class BiomeUtil {
 		Set<Holder<Biome>> getAdditionalPossibleBiomes(Registry<Biome> registry);
 
 		/**
-		 * Gets a {@link Codec} instance for serializing and deserializing this provider.
+		 * Gets a {@link MapCodec} instance for serializing and deserializing this provider.
 		 *
-		 * @return A {@link Codec} instance for serializing and deserializing this provider.
+		 * @return A {@link MapCodec} instance for serializing and deserializing this provider.
 		 */
-		Codec<? extends ModdedBiomeProvider> codec();
+		MapCodec<? extends ModdedBiomeProvider> codec();
 	}
 
 	/**
@@ -130,7 +131,7 @@ public final class BiomeUtil {
 	public enum OriginalModdedBiomeProvider implements ModdedBiomeProvider {
 		INSTANCE;
 
-		public static final Codec<OriginalModdedBiomeProvider> CODEC = Codec.unit(INSTANCE);
+		public static final MapCodec<OriginalModdedBiomeProvider> CODEC = MapCodec.unit(INSTANCE);
 		private static final Set<Holder<Biome>> POSSIBLE_BIOMES = ImmutableSet.of();
 
 		@Override
@@ -139,7 +140,7 @@ public final class BiomeUtil {
 		}
 
 		@Override
-		public Codec<? extends ModdedBiomeProvider> codec() {
+		public MapCodec<? extends ModdedBiomeProvider> codec() {
 			return CODEC;
 		}
 
@@ -155,7 +156,7 @@ public final class BiomeUtil {
 	 * @author SmellyModder (Luke Tonon)
 	 */
 	public static class MultiNoiseModdedBiomeProvider implements ModdedBiomeProvider {
-		private static final Codec<MultiNoiseModdedBiomeProvider> CODEC = RecordCodecBuilder.create(instance -> {
+		private static final MapCodec<MultiNoiseModdedBiomeProvider> CODEC = RecordCodecBuilder.mapCodec(instance -> {
 			return instance.group(
 					NullableFieldCodec.nullable("areas", Codec.unboundedMap(BIOME_KEY_CODEC, BIOME_KEY_CODEC), ImmutableMap.of()).forGetter(provider -> provider.areas),
 					Codec.either(MultiNoiseBiomeSourceParameterList.CODEC, ExtraCodecs.nonEmptyList(RecordCodecBuilder.<Pair<Climate.ParameterPoint, ResourceKey<Biome>>>create(pairInstance -> pairInstance.group(Climate.ParameterPoint.CODEC.fieldOf("parameters").forGetter(Pair::getFirst), BIOME_KEY_CODEC.fieldOf("biome").forGetter(Pair::getSecond)).apply(pairInstance, Pair::of)).listOf())).fieldOf("biomes").forGetter(provider -> provider.rawBiomes),
@@ -203,7 +204,7 @@ public final class BiomeUtil {
 		}
 
 		@Override
-		public Codec<? extends ModdedBiomeProvider> codec() {
+		public MapCodec<? extends ModdedBiomeProvider> codec() {
 			return CODEC;
 		}
 
@@ -289,7 +290,7 @@ public final class BiomeUtil {
 	 * @author SmellyModder (Luke Tonon)
 	 */
 	public record OverlayModdedBiomeProvider(List<Pair<HolderSet<Biome>, BiomeSource>> overlays) implements ModdedBiomeProvider {
-		public static final Codec<OverlayModdedBiomeProvider> CODEC = RecordCodecBuilder.create(instance -> {
+		public static final MapCodec<OverlayModdedBiomeProvider> CODEC = RecordCodecBuilder.mapCodec(instance -> {
 			return instance.group(
 					Codec.mapPair(RegistryCodecs.homogeneousList(Registries.BIOME).fieldOf("matches_biomes"), BiomeSource.CODEC.fieldOf("biome_source")).codec().listOf().fieldOf("overlays").forGetter(provider -> provider.overlays)
 			).apply(instance, OverlayModdedBiomeProvider::new);
@@ -312,7 +313,7 @@ public final class BiomeUtil {
 		}
 
 		@Override
-		public Codec<? extends ModdedBiomeProvider> codec() {
+		public MapCodec<? extends ModdedBiomeProvider> codec() {
 			return CODEC;
 		}
 	}
@@ -323,7 +324,7 @@ public final class BiomeUtil {
 	 * @author SmellyModder (Luke Tonon)
 	 */
 	public record BiomeSourceModdedBiomeProvider(BiomeSource biomeSource) implements ModdedBiomeProvider {
-		public static final Codec<BiomeSourceModdedBiomeProvider> CODEC = RecordCodecBuilder.create(instance -> {
+		public static final MapCodec<BiomeSourceModdedBiomeProvider> CODEC = RecordCodecBuilder.mapCodec(instance -> {
 			return instance.group(
 					BiomeSource.CODEC.fieldOf("biome_source").forGetter(provider -> provider.biomeSource)
 			).apply(instance, BiomeSourceModdedBiomeProvider::new);
@@ -340,7 +341,7 @@ public final class BiomeUtil {
 		}
 
 		@Override
-		public Codec<? extends ModdedBiomeProvider> codec() {
+		public MapCodec<? extends ModdedBiomeProvider> codec() {
 			return CODEC;
 		}
 	}

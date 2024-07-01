@@ -9,7 +9,6 @@ import com.teamabnormals.blueprint.core.Blueprint;
 import com.teamabnormals.blueprint.core.data.server.BlueprintDatapackBuiltinEntriesProvider;
 import com.teamabnormals.blueprint.core.registry.BlueprintBiomes;
 import com.teamabnormals.blueprint.core.registry.BlueprintDataPackRegistries;
-import com.teamabnormals.blueprint.core.registry.BlueprintHolderSets;
 import com.teamabnormals.blueprint.core.util.BiomeUtil;
 import core.BlueprintTest;
 import core.registry.TestTrimMaterials;

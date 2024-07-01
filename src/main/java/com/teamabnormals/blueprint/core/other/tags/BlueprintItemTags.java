@@ -6,13 +6,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
 public class BlueprintItemTags {
-	public static final TagKey<Item> CHICKEN_FOOD = itemTag("chicken_food");
-	public static final TagKey<Item> PIG_FOOD = itemTag("pig_food");
-	public static final TagKey<Item> STRIDER_FOOD = itemTag("strider_food");
-	public static final TagKey<Item> STRIDER_TEMPT_ITEMS = itemTag("strider_tempt_items");
-	public static final TagKey<Item> OCELOT_FOOD = itemTag("ocelot_food");
-	public static final TagKey<Item> CAT_FOOD = itemTag("cat_food");
-
 	public static final TagKey<Item> MILK = TagUtil.itemTag("forge", "milk");
 	public static final TagKey<Item> PUMPKINS = TagUtil.itemTag("forge", "pumpkins");
 

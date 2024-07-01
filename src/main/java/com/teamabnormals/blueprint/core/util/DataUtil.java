@@ -11,13 +11,10 @@ import com.teamabnormals.blueprint.core.api.conditions.config.IConfigPredicate;
 import com.teamabnormals.blueprint.core.api.conditions.config.IConfigPredicateSerializer;
 import com.teamabnormals.blueprint.core.api.conditions.loot.ConfigLootCondition;
 import net.minecraft.Util;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.client.color.item.ItemColors;
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
@@ -25,37 +22,25 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagManager;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ai.behavior.GiveGiftToHero;
-import net.minecraft.world.entity.animal.Parrot;
-import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.DecoratedPotPatterns;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -68,11 +53,10 @@ import java.util.function.Predicate;
  * @author SmellyModder (Luke Tonon)
  * @author abigailfails
  */
-@Mod.EventBusSubscriber(modid = Blueprint.MOD_ID)
+@EventBusSubscriber(modid = Blueprint.MOD_ID)
 public final class DataUtil {
 	public static final Field TAG_MANAGER = ObfuscationReflectionHelper.findField(ReloadableServerResources.class, "f_206849_");
 	public static final Field REGISTRY_ACCESS = ObfuscationReflectionHelper.findField(TagManager.class, "f_144569_");
-	private static final Method ADD_MIX_METHOD = ObfuscationReflectionHelper.findMethod(PotionBrewing.class, "m_43513_", Potion.class, Item.class, Potion.class);
 	private static final Vector<AlternativeDispenseBehavior> ALTERNATIVE_DISPENSE_BEHAVIORS = new Vector<>();
 	private static final Vector<CustomNoteBlockInstrument> CUSTOM_NOTE_BLOCK_INSTRUMENTS = new Vector<>();
 	private static final ArrayList<Pair<ResourceLocation, Pair<Function<RegistryAccess, StructurePoolElement>, Integer>>> TEMPLATE_POOL_ADDITIONS = new ArrayList<>();
@@ -116,98 +100,14 @@ public final class DataUtil {
 	}
 
 	/**
-	 * Adds a potion mix.
-	 *
-	 * @param input    An input {@link Potion}.
-	 * @param reactant A reactant {@link Item}.
-	 * @param result   A resulting {@link Potion}.
-	 */
-	public static void addMix(Potion input, Item reactant, Potion result) {
-		try {
-			ADD_MIX_METHOD.invoke(null, input, reactant, result);
-		} catch (IllegalAccessException | InvocationTargetException e) {
-			throw new IllegalStateException("Failed to add mix for " + ForgeRegistries.POTIONS.getKey(result) + " from " + ForgeRegistries.ITEMS.getKey(reactant), e);
-		}
-	}
-
-	/**
-	 * Registers a {@link BlockColor} for a list of blocks.
-	 *
-	 * @param blockColors The {@link BlockColors} to register to.
-	 * @param color       A {@link BlockColor} to use.
-	 * @param blocksIn    A list of blocks to register.
-	 */
-	@OnlyIn(Dist.CLIENT)
-	public static void registerBlockColor(BlockColors blockColors, BlockColor color, List<RegistryObject<Block>> blocksIn) {
-		blocksIn.removeIf(block -> !block.isPresent());
-		if (blocksIn.size() > 0) {
-			Block[] blocks = new Block[blocksIn.size()];
-			for (int i = 0; i < blocksIn.size(); i++) {
-				blocks[i] = blocksIn.get(i).get();
-			}
-			blockColors.register(color, blocks);
-		}
-	}
-
-	/**
-	 * Registers an {@link ItemColor} for a list of block items.
-	 *
-	 * @param itemColors The {@link ItemColors} to register to.
-	 * @param color      An {@link ItemColor} to use.
-	 * @param blocksIn   A list of blocks to register.
-	 */
-	@OnlyIn(Dist.CLIENT)
-	public static void registerBlockItemColor(ItemColors itemColors, ItemColor color, List<RegistryObject<Block>> blocksIn) {
-		blocksIn.removeIf(block -> !block.isPresent());
-		if (blocksIn.size() > 0) {
-			Block[] blocks = new Block[blocksIn.size()];
-			for (int i = 0; i < blocksIn.size(); i++) {
-				blocks[i] = blocksIn.get(i).get();
-			}
-			itemColors.register(color, blocks);
-		}
-	}
-
-	/**
-	 * Adds a gift loot table to a {@link VillagerProfession}
-	 *
-	 * @param profession The profession that will give a gift
-	 */
-	public static void registerVillagerGift(VillagerProfession profession) {
-		ResourceLocation name = ForgeRegistries.VILLAGER_PROFESSIONS.getKey(profession);
-		if (name != null) {
-			GiveGiftToHero.GIFTS.put(profession, new ResourceLocation(name.getNamespace(), "gameplay/hero_of_the_village/" + name.getPath() + "_gift"));
-		}
-	}
-
-	/**
-	 * Adds a {@link SoundEvent} for when a Parrot imitates a specific {@link EntityType}
-	 *
-	 * @param entityType The entity type to imitate
-	 * @param soundEvent The sound event to play when imitating
-	 */
-	public static void registerParrotImitation(EntityType<?> entityType, SoundEvent soundEvent) {
-		Parrot.MOB_SOUND_MAP.put(entityType, soundEvent);
-	}
-
-	/**
-	 * Adds an {@link Item} as a valid item for taming Parrots
-	 *
-	 * @param items The items to add as Parrot food
-	 */
-	public static void addParrotFood(Item... items) {
-		Collections.addAll(Parrot.TAME_FOOD, items);
-	}
-
-	/**
 	 * Adds a Decorated Pot Pattern for Decorated Pots
 	 *
-	 * @param entries Pairs of an {@link Item} and a {@link RegistryObject} of a String
+	 * @param entries Pairs of an {@link Item} and a {@link net.minecraft.core.Holder} of a String
 	 */
 	@SafeVarargs
-	public static void registerDecoratedPotPattern(Pair<Item, RegistryObject<String>>... entries) {
+	public static void registerDecoratedPotPattern(Pair<Item, DeferredHolder<String, ?>>... entries) {
 		Map<Item, ResourceKey<String>> itemToPotTextureMap = Maps.newHashMap(DecoratedPotPatterns.ITEM_TO_POT_TEXTURE);
-		for (Pair<Item, RegistryObject<String>> entry : entries) {
+		for (Pair<Item, DeferredHolder<String, ?>> entry : entries) {
 			itemToPotTextureMap.put(entry.getFirst(), entry.getSecond().getKey());
 		}
 		DecoratedPotPatterns.ITEM_TO_POT_TEXTURE = itemToPotTextureMap;
@@ -258,7 +158,7 @@ public final class DataUtil {
 	 * @param name  The new name of the block
 	 */
 	public static void changeBlockLocalization(Block block, String modid, String name) {
-		block.descriptionId = Util.makeDescriptionId("block", new ResourceLocation(modid, name));
+		block.descriptionId = Util.makeDescriptionId("block", ResourceLocation.fromNamespaceAndPath(modid, name));
 	}
 
 	/**
@@ -271,9 +171,9 @@ public final class DataUtil {
 	 * @param output    The new name of the block
 	 */
 	public static void changeBlockLocalization(String inputMod, String input, String outputMod, String output) {
-		Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(inputMod, input));
-		if (block != null)
-			block.descriptionId = Util.makeDescriptionId("block", new ResourceLocation(outputMod, output));
+		var block = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(inputMod, input));
+		if (block.isPresent())
+			block.get().descriptionId = Util.makeDescriptionId("block", ResourceLocation.fromNamespaceAndPath(outputMod, output));
 	}
 
 	/**
@@ -284,7 +184,7 @@ public final class DataUtil {
 	 * @param name  The new name of the item
 	 */
 	public static void changeItemLocalization(Item item, String modid, String name) {
-		item.descriptionId = Util.makeDescriptionId("item", new ResourceLocation(modid, name));
+		item.descriptionId = Util.makeDescriptionId("item", ResourceLocation.fromNamespaceAndPath(modid, name));
 	}
 
 	/**
@@ -297,9 +197,9 @@ public final class DataUtil {
 	 * @param output    The new name of the item
 	 */
 	public static void changeItemLocalization(String inputMod, String input, String outputMod, String output) {
-		Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(inputMod, input));
-		if (item != null)
-			item.descriptionId = Util.makeDescriptionId("item", new ResourceLocation(outputMod, output));
+		var item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath(inputMod, input));
+		if (item.isPresent())
+			item.get().descriptionId = Util.makeDescriptionId("item", ResourceLocation.fromNamespaceAndPath(outputMod, output));
 	}
 
 	/**
@@ -320,8 +220,7 @@ public final class DataUtil {
 	 * already registered if not. See {@link AlternativeDispenseBehavior} for details.
 	 *
 	 * <p>Since Blueprint handles registering the condition at the right time, mods should call this method as
-	 * early as possible, ideally in an {@link net.minecraftforge.fml.event.lifecycle.ParallelDispatchEvent#enqueueWork enqueueWork}
-	 * call within an {@link net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent FMLCommonSetupEvent}.</p>
+	 * early as possible.<p>
 	 *
 	 * @param behavior The {@link AlternativeDispenseBehavior} to be registered.
 	 * @author abigailfails
@@ -337,8 +236,7 @@ public final class DataUtil {
 	 * See {@link CustomNoteBlockInstrument} for details.
 	 *
 	 * <p>Since Blueprint adds instruments to an internal list at the end of mod loading, mods should call
-	 * this method as early as possible, ideally in an
-	 * {@link net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent FMLCommonSetupEvent} listener.</p>
+	 * this method as early as possible.</p>
 	 *
 	 * @param instrument The {@link CustomNoteBlockInstrument} to get registered.
 	 * @author abigailfails
@@ -362,9 +260,9 @@ public final class DataUtil {
 
 	/**
 	 * Registers a {@link ConfigValueCondition.Serializer} under the name {@code "[modId]:config"}
-	 * that accepts the values of {@link ConfigKey} annotations for {@link net.minecraftforge.common.ForgeConfigSpec.ConfigValue}
+	 * that accepts the values of {@link ConfigKey} annotations for {@link net.neoforged.neoforge.common.ModConfigSpec.ConfigValue}
 	 * fields in the passed-in collection of objects, checking against the annotation's corresponding
-	 * {@link net.minecraftforge.common.ForgeConfigSpec.ConfigValue} to determine whether the condition should pass.<br><br>
+	 * {@link net.neoforged.neoforge.common.ModConfigSpec.ConfigValue} to determine whether the condition should pass.<br><br>
 	 * <h2>Function</h2>
 	 * <p>This method allows you to make crafting recipes, modifiers, loot tables, etc. check whether a specific config
 	 * field is true/whether it meets specific predicates before loading without having to hardcode new condition classes
@@ -372,7 +270,7 @@ public final class DataUtil {
 	 * should be called during common setup accordingly.</p><br><br>
 	 *
 	 * <h2>Implementation</h2>
-	 * <p>All the {@link net.minecraftforge.common.ForgeConfigSpec.ConfigValue}s in the objects in
+	 * <p>All the {@link net.neoforged.neoforge.common.ModConfigSpec.ConfigValue}s in the objects in
 	 * {@code configObjects} with a {@link ConfigKey} annotation are mapped to the string values
 	 * of their field's annotation.
 	 *
@@ -433,13 +331,13 @@ public final class DataUtil {
 	 * @author abigailfails
 	 */
 	public static LootItemConditionType registerConfigCondition(String modId, Object... configObjects) {
-		HashMap<String, ForgeConfigSpec.ConfigValue<?>> configValues = new HashMap<>();
+		HashMap<String, ModConfigSpec.ConfigValue<?>> configValues = new HashMap<>();
 		for (Object object : configObjects) {
 			for (Field field : object.getClass().getDeclaredFields()) {
-				if (field.getAnnotation(ConfigKey.class) != null && ForgeConfigSpec.ConfigValue.class.isAssignableFrom(field.getType())) {
+				if (field.getAnnotation(ConfigKey.class) != null && ModConfigSpec.ConfigValue.class.isAssignableFrom(field.getType())) {
 					field.setAccessible(true);
 					try {
-						configValues.put(field.getAnnotation(ConfigKey.class).value(), (ForgeConfigSpec.ConfigValue<?>) field.get(object));
+						configValues.put(field.getAnnotation(ConfigKey.class).value(), (ModConfigSpec.ConfigValue<?>) field.get(object));
 					} catch (IllegalAccessException ignored) {
 					}
 				}
@@ -453,7 +351,7 @@ public final class DataUtil {
 	 * Registers an {@link IConfigPredicateSerializer} for an
 	 * {@link IConfigPredicate IConfigPredicate}.
 	 *
-	 * <p>The predicate takes in a {@link ForgeConfigSpec.ConfigValue} and returns true if it matches specific conditions.</p>
+	 * <p>The predicate takes in a {@link ModConfigSpec.ConfigValue} and returns true if it matches specific conditions.</p>
 	 *
 	 * @param serializer The serializer to register.
 	 */

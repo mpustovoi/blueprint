@@ -10,11 +10,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -74,7 +74,7 @@ public class OnlineImageCache {
 			this.cacheFileData = new JsonObject();
 		}
 
-		MinecraftForge.EVENT_BUS.register(this);
+		NeoForge.EVENT_BUS.register(this);
 	}
 
 	private boolean hasTextureExpired(String hash) {
@@ -147,7 +147,7 @@ public class OnlineImageCache {
 			return CompletableFuture.completedFuture(MissingTextureAtlasSprite.getLocation());
 		}
 
-		ResourceLocation location = this.locationCache.computeIfAbsent(hash, key -> new ResourceLocation("blueprint", key));
+		ResourceLocation location = this.locationCache.computeIfAbsent(hash, key -> ResourceLocation.fromNamespaceAndPath("blueprint", key));
 		if (Minecraft.getInstance().getTextureManager().getTexture(location, null) != null) {
 			this.textureCache.put(hash, System.currentTimeMillis() + 30000);
 			return CompletableFuture.completedFuture(location);
@@ -190,10 +190,9 @@ public class OnlineImageCache {
 	}
 
 	@SubscribeEvent
-	public void onEvent(TickEvent.ClientTickEvent event) {
+	public void onEvent(ClientTickEvent event) {
 		this.locationCache.entrySet().removeIf(entry -> Minecraft.getInstance().getTextureManager().getTexture(entry.getValue(), null) == null);
-		this.locationCache.forEach((hash, location) ->
-		{
+		this.locationCache.forEach((hash, location) -> {
 			if (this.hasTextureExpired(hash)) {
 				Minecraft.getInstance().execute(() -> Minecraft.getInstance().getTextureManager().release(location));
 			}

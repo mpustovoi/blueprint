@@ -6,14 +6,15 @@ import com.teamabnormals.blueprint.core.registry.BlueprintBoatTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.item.Item;
@@ -22,8 +23,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.network.PlayMessages;
 
 public class BlueprintChestBoat extends ChestBoat implements HasBlueprintBoatType {
 	private static final EntityDataAccessor<String> BOAT_TYPE = SynchedEntityData.defineId(BlueprintChestBoat.class, EntityDataSerializers.STRING);
@@ -42,14 +41,10 @@ public class BlueprintChestBoat extends ChestBoat implements HasBlueprintBoatTyp
 		this.zo = z;
 	}
 
-	public BlueprintChestBoat(PlayMessages.SpawnEntity spawnEntity, Level level) {
-		this(BlueprintEntityTypes.CHEST_BOAT.get(), level);
-	}
-
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(BOAT_TYPE, BlueprintBoatTypes.UNDEFINED_BOAT_LOCATION.toString());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(BOAT_TYPE, BlueprintBoatTypes.UNDEFINED_BOAT_LOCATION.toString());
 	}
 
 	@Override
@@ -63,7 +58,7 @@ public class BlueprintChestBoat extends ChestBoat implements HasBlueprintBoatTyp
 		super.readAdditionalSaveData(compound);
 		if (compound.contains("Type", Tag.TAG_STRING)) {
 			String type = compound.getString("Type");
-			ResourceLocation name = new ResourceLocation(type);
+			ResourceLocation name = ResourceLocation.parse(type);
 			if (BlueprintBoatTypes.getType(name) != null) this.setType(name);
 			else this.setType(BlueprintBoatTypes.UNDEFINED_BOAT_LOCATION);
 		} else {
@@ -105,6 +100,25 @@ public class BlueprintChestBoat extends ChestBoat implements HasBlueprintBoatTyp
 	}
 
 	@Override
+	protected Vec3 getPassengerAttachmentPoint(Entity p_294665_, EntityDimensions p_295933_, float p_295585_) {
+		float f = this.getSinglePassengerXOffset();
+		if (this.getPassengers().size() > 1) {
+			int i = this.getPassengers().indexOf(p_294665_);
+			if (i == 0) {
+				f = 0.2F;
+			} else {
+				f = -0.6F;
+			}
+
+			if (p_294665_ instanceof Animal) {
+				f += 0.2F;
+			}
+		}
+		return new Vec3(0.0, this.getBoatType().isRaft() ? (double)(p_295933_.height() * 0.8888889F) : (double)(p_295933_.height() / 3.0F), (double)f)
+				.yRot(-this.getYRot() * (float) (Math.PI / 180.0));
+	}
+
+	@Override
 	public Item getDropItem() {
 		return this.getBoatType().getChestBoatItem();
 	}
@@ -114,17 +128,12 @@ public class BlueprintChestBoat extends ChestBoat implements HasBlueprintBoatTyp
 		return Type.OAK;
 	}
 
-	@Override
-	public Packet<ClientGamePacketListener> getAddEntityPacket() {
-		return NetworkHooks.getEntitySpawningPacket(this);
-	}
-
 	public void setType(ResourceLocation type) {
 		this.entityData.set(BOAT_TYPE, type.toString());
 	}
 
 	@Override
 	public BlueprintBoatTypes.BlueprintBoatType getBoatType() {
-		return BlueprintBoatTypes.getType(new ResourceLocation(this.entityData.get(BOAT_TYPE)));
+		return BlueprintBoatTypes.getType(ResourceLocation.parse(this.entityData.get(BOAT_TYPE)));
 	}
 }

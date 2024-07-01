@@ -1,13 +1,12 @@
 package com.teamabnormals.blueprint.core.util.item;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.util.MutableHashedLinkedMap;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.util.MutableHashedLinkedMap;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -260,24 +259,23 @@ public final class CreativeModeTabContentsPopulator {
 				TreeMap<String, ItemStack> treeMap = new TreeMap<>();
 				entries.forEach(entry -> {
 					ItemStack stack = entry.getKey();
-					ResourceLocation location = ForgeRegistries.ITEMS.getKey(stack.getItem());
-					if (location != null && shouldCompareToStack.test(stack))
-						treeMap.putIfAbsent(location.getPath(), stack);
+					var key = BuiltInRegistries.ITEM.getResourceKey(stack.getItem());
+					if (key.isPresent() && shouldCompareToStack.test(stack))
+						treeMap.putIfAbsent(key.get().location().getPath(), stack);
 				});
 				CreativeModeTab.TabVisibility visibility = this.visibility;
 				for (Supplier<ItemStack> supplier : items) {
 					ItemStack stack = supplier.get();
-					ResourceLocation location = ForgeRegistries.ITEMS.getKey(stack.getItem());
-					if (location != null) {
-						String path = location.getPath();
-						var entry = treeMap.floorEntry(path);
-						if (entry != null) {
-							entries.putAfter(entry.getValue(), stack, visibility);
-						} else {
-							entries.put(stack, visibility);
-						}
-						treeMap.put(path, stack);
+					var key = BuiltInRegistries.ITEM.getResourceKey(stack.getItem());
+					if (key.isEmpty()) continue;
+					String path = key.get().location().getPath();
+					var entry = treeMap.floorEntry(path);
+					if (entry != null) {
+						entries.putAfter(entry.getValue(), stack, visibility);
+					} else {
+						entries.put(stack, visibility);
 					}
+					treeMap.put(path, stack);
 				}
 			});
 		}

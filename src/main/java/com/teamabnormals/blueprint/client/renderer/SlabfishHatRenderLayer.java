@@ -57,7 +57,7 @@ public class SlabfishHatRenderLayer extends RenderLayer<AbstractClientPlayer, Pl
 		ResourceLocation typeLocation = REWARD_CACHE.requestTexture(reward.getTier() >= 4 && slabfish.getTypeUrl() != null && RewardHandler.SlabfishSetting.getSetting(data, RewardHandler.SlabfishSetting.TYPE) ? slabfish.getTypeUrl() : defaultTypeUrl).getNow(null);
 		if (typeLocation == null)
 			return;
-		
+
 		ResourceLocation sweaterLocation = reward.getTier() >= 3 && slabfish.getSweaterUrl() != null && RewardHandler.SlabfishSetting.getSetting(data, RewardHandler.SlabfishSetting.SWEATER) ? REWARD_CACHE.requestTexture(slabfish.getSweaterUrl()).getNow(null) : null;
 		ResourceLocation backpackLocation = slabfish.getBackpackUrl() != null && RewardHandler.SlabfishSetting.getSetting(data, RewardHandler.SlabfishSetting.BACKPACK) ? REWARD_CACHE.requestTexture(slabfish.getBackpackUrl()).getNow(null) : null;
 		ModelPart body = this.model.body;

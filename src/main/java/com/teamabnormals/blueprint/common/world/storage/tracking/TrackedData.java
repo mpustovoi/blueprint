@@ -1,5 +1,8 @@
 package com.teamabnormals.blueprint.common.world.storage.tracking;
 
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+
 import java.util.function.Supplier;
 
 /**
@@ -14,14 +17,14 @@ import java.util.function.Supplier;
  * @author SmellyModder (Luke Tonon)
  */
 public class TrackedData<T> {
-	private final IDataProcessor<T> processor;
+	private final StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec;
 	private final Supplier<T> defaultValue;
 	private final SyncType syncType;
 	private final boolean save;
 	private final boolean persistent;
 
-	private TrackedData(final IDataProcessor<T> processor, final Supplier<T> defaultValue, final SyncType syncType, final boolean save, final boolean persistent) {
-		this.processor = processor;
+	private TrackedData(StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec, Supplier<T> defaultValue, SyncType syncType, boolean save, boolean persistent) {
+		this.streamCodec = streamCodec;
 		this.defaultValue = defaultValue;
 		this.syncType = syncType;
 		this.save = save;
@@ -29,12 +32,12 @@ public class TrackedData<T> {
 	}
 
 	/**
-	 * Gets this data's {@link #processor}.
+	 * Gets this data's {@link #streamCodec}.
 	 *
-	 * @return This data's {@link #processor}.
+	 * @return This data's {@link #streamCodec}.
 	 */
-	public IDataProcessor<T> getProcessor() {
-		return this.processor;
+	public StreamCodec<? super RegistryFriendlyByteBuf, T> getStreamCodec() {
+		return streamCodec;
 	}
 
 	/**
@@ -80,14 +83,14 @@ public class TrackedData<T> {
 	 * @author SmellyModder (Luke Tonon)
 	 */
 	public static class Builder<T> {
-		private final IDataProcessor<T> processor;
+		private final StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec;
 		private final Supplier<T> defaultValue;
 		private SyncType syncType;
 		private boolean save;
 		private boolean persistent;
 
-		private Builder(final IDataProcessor<T> processor, final Supplier<T> defaultValue) {
-			this.processor = processor;
+		private Builder(StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec, final Supplier<T> defaultValue) {
+			this.streamCodec = streamCodec;
 			this.defaultValue = defaultValue;
 			this.syncType = SyncType.TO_CLIENTS;
 		}
@@ -95,12 +98,12 @@ public class TrackedData<T> {
 		/**
 		 * Creates a builder for a {@link IDataProcessor}.
 		 *
-		 * @param processor The processor to use for the {@link TrackedData}.
-		 * @param <T>       The type of data to track.
+		 * @param streamCodec The stream codec to use for serializing and deserializing.
+		 * @param <T>         The type of data to track.
 		 * @return This current builder.
 		 */
-		public static <T> Builder<T> create(final IDataProcessor<T> processor, final Supplier<T> defaultValue) {
-			return new Builder<>(processor, defaultValue);
+		public static <T> Builder<T> create(StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec, final Supplier<T> defaultValue) {
+			return new Builder<>(streamCodec, defaultValue);
 		}
 
 		/**
@@ -142,7 +145,7 @@ public class TrackedData<T> {
 		 * @return A {@link TrackedData} constructed using this builder.
 		 */
 		public TrackedData<T> build() {
-			return new TrackedData<>(this.processor, this.defaultValue, this.syncType, this.save, this.persistent);
+			return new TrackedData<>(this.streamCodec, this.defaultValue, this.syncType, this.save, this.persistent);
 		}
 	}
 }

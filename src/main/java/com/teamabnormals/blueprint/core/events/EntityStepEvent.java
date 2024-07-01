@@ -4,9 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 
 /**
@@ -15,8 +15,7 @@ import net.minecraftforge.eventbus.api.Event;
  *
  * @author abigailfails
  */
-@Cancelable
-public final class EntityStepEvent extends Event {
+public final class EntityStepEvent extends Event implements ICancellableEvent {
 	private final Level level;
 	private final BlockPos pos;
 	private final BlockState state;
@@ -38,7 +37,7 @@ public final class EntityStepEvent extends Event {
 	 * @param entity The {@link Entity} that stepped on the block at {@code pos}.
 	 */
 	public static boolean onEntityStep(Level level, BlockPos pos, BlockState state, Entity entity) {
-		return MinecraftForge.EVENT_BUS.post(new EntityStepEvent(level, pos, state, entity));
+		return NeoForge.EVENT_BUS.post(new EntityStepEvent(level, pos, state, entity)).isCanceled();
 	}
 
 	public Level getLevel() {
@@ -55,10 +54,5 @@ public final class EntityStepEvent extends Event {
 
 	public Entity getEntity() {
 		return this.entity;
-	}
-
-	@Override
-	public boolean isCancelable() {
-		return true;
 	}
 }

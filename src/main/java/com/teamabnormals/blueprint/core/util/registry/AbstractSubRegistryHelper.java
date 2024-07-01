@@ -1,8 +1,8 @@
 package com.teamabnormals.blueprint.core.util.registry;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.DeferredRegister;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * An abstract implementation class of {@link ISubRegistryHelper}.

@@ -1,6 +1,6 @@
 package com.teamabnormals.blueprint.common.world.modification.structure;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;
@@ -17,8 +17,7 @@ import org.jetbrains.annotations.Nullable;
  * @see StructureRepaletter
  */
 public record SimpleStructureRepaletter(Block replacesBlock, Block replacesWith) implements StructureRepaletter {
-	@SuppressWarnings("deprecation")
-	public static final Codec<SimpleStructureRepaletter> CODEC = RecordCodecBuilder.create(instance -> {
+	public static final MapCodec<SimpleStructureRepaletter> CODEC = RecordCodecBuilder.mapCodec(instance -> {
 		return instance.group(
 				BuiltInRegistries.BLOCK.byNameCodec().fieldOf("replaces_block").forGetter(repaletter -> repaletter.replacesBlock),
 				BuiltInRegistries.BLOCK.byNameCodec().fieldOf("replaces_with").forGetter(repaletter -> repaletter.replacesWith)
@@ -32,7 +31,7 @@ public record SimpleStructureRepaletter(Block replacesBlock, Block replacesWith)
 	}
 
 	@Override
-	public Codec<? extends StructureRepaletter> codec() {
+	public MapCodec<? extends StructureRepaletter> codec() {
 		return CODEC;
 	}
 }

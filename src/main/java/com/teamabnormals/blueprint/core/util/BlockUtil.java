@@ -1,8 +1,7 @@
 package com.teamabnormals.blueprint.core.util;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
-import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
@@ -21,7 +20,6 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 /**
  * A class containing some utility methods related to blocks.
@@ -118,17 +116,6 @@ public final class BlockUtil {
 	}
 
 	/**
-	 * Rotates a given {@link AABB} using a given {@link BBRotation}.
-	 *
-	 * @param bb       An {@link AABB} to rotate.
-	 * @param rotation A {@link BBRotation} to use.
-	 * @return A rotated {@link AABB}.
-	 */
-	public static AABB rotateHorizontalBB(AABB bb, BBRotation rotation) {
-		return rotation.rotateBB(bb);
-	}
-
-	/**
 	 * <p>Returns the {@link BlockPos} offset by 1 in the direction of {@code source}'s {@link BlockState}'s
 	 * {@link DirectionalBlock#FACING} property.</p>
 	 * This requires the {@link BlockState} stored in {@code source} to have a {@link DirectionalBlock#FACING} property.
@@ -138,7 +125,7 @@ public final class BlockUtil {
 	 * @author abigailfails
 	 */
 	public static BlockPos offsetPos(BlockSource source) {
-		return source.getPos().relative(source.getBlockState().getValue(DirectionalBlock.FACING));
+		return source.pos().relative(source.state().getValue(DirectionalBlock.FACING));
 	}
 
 	/**
@@ -149,7 +136,7 @@ public final class BlockUtil {
 	 * @see #offsetPos(BlockSource source)
 	 */
 	public static BlockState getStateAtOffsetPos(BlockSource source) {
-		return source.getLevel().getBlockState(offsetPos(source));
+		return source.level().getBlockState(offsetPos(source));
 	}
 
 	/**
@@ -161,7 +148,7 @@ public final class BlockUtil {
 	 * @see #offsetPos(BlockSource source)
 	 */
 	public static <T extends Entity> List<T> getEntitiesAtOffsetPos(BlockSource source, Class<T> entityType) {
-		return source.getLevel().getEntitiesOfClass(entityType, new AABB(offsetPos(source)));
+		return source.level().getEntitiesOfClass(entityType, new AABB(offsetPos(source)));
 	}
 
 	/**
@@ -174,67 +161,6 @@ public final class BlockUtil {
 	 * @see #offsetPos(BlockSource source)
 	 */
 	public static <T extends Entity> List<T> getEntitiesAtOffsetPos(BlockSource source, Class<T> entityType, Predicate<? super T> predicate) {
-		return source.getLevel().getEntitiesOfClass(entityType, new AABB(offsetPos(source)), predicate);
-	}
-
-	/**
-	 * An enum containing types for rotating an {@link AABB}.
-	 */
-	public enum BBRotation {
-		REVERSE_X((bb) -> {
-			final float minX = 1.0F - (float) bb.maxX;
-			return new AABB(minX, bb.minY, bb.minZ, bb.maxX >= 1.0F ? bb.maxX - bb.minX : bb.maxX + minX, bb.maxY, bb.maxZ);
-		}),
-		REVERSE_Z((bb) -> {
-			final float minZ = 1.0F - (float) bb.maxZ;
-			return new AABB(bb.minX, bb.minY, minZ, bb.maxX, bb.maxY, bb.maxZ >= 1.0F ? bb.maxZ - bb.minZ : bb.maxZ + minZ);
-		}),
-		RIGHT((bb) -> {
-			return new AABB(bb.minZ, bb.minY, bb.minX, bb.maxZ, bb.maxY, bb.maxX);
-		}),
-		LEFT((bb) -> {
-			return REVERSE_X.rotateBB(RIGHT.rotateBB(bb));
-		});
-
-		private final UnaryOperator<AABB> modifier;
-
-		BBRotation(UnaryOperator<AABB> modifier) {
-			this.modifier = modifier;
-		}
-
-		/**
-		 * Gets the {@link BBRotation} to use for a given current {@link Direction} and starting {@link Direction}.
-		 *
-		 * @param currentDirection  A current {@link Direction}.
-		 * @param startingDirection A starting {@link Direction}.
-		 * @return The {@link BBRotation} to use for a given current {@link Direction} and starting {@link Direction}.
-		 */
-		public static BBRotation getRotationForDirection(Direction currentDirection, Direction startingDirection) {
-			int currentIndex = currentDirection.get3DDataValue() - 2;
-			int startingIndex = startingDirection.get3DDataValue() - 2;
-			int index = (currentIndex - startingIndex) % 4;
-
-			switch (index) {
-				default:
-				case 0:
-					return BBRotation.REVERSE_X;
-				case 1:
-					return BBRotation.REVERSE_Z;
-				case 2:
-					return BBRotation.RIGHT;
-				case 3:
-					return BBRotation.LEFT;
-			}
-		}
-
-		/**
-		 * Rotates a given {@link AABB}.
-		 *
-		 * @param bb An {@link AABB} to rotate.
-		 * @return A rotated {@link AABB}.
-		 */
-		public AABB rotateBB(AABB bb) {
-			return this.modifier.apply(bb);
-		}
+		return source.level().getEntitiesOfClass(entityType, new AABB(offsetPos(source)), predicate);
 	}
 }

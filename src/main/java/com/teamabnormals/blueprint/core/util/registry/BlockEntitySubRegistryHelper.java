@@ -1,13 +1,14 @@
 package com.teamabnormals.blueprint.core.util.registry;
 
 import com.google.common.collect.Sets;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.Set;
 import java.util.function.Supplier;
@@ -26,7 +27,7 @@ public class BlockEntitySubRegistryHelper extends AbstractSubRegistryHelper<Bloc
 	}
 
 	public BlockEntitySubRegistryHelper(RegistryHelper parent) {
-		super(parent, DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, parent.getModId()));
+		super(parent, DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, parent.getModId()));
 	}
 
 	/**
@@ -36,7 +37,7 @@ public class BlockEntitySubRegistryHelper extends AbstractSubRegistryHelper<Bloc
 	 * @return A filtered array of registered {@link Block}s that are an instance of a {@link Block} class
 	 */
 	public static Block[] collectBlocks(Class<?> blockClass) {
-		return ForgeRegistries.BLOCKS.getValues().stream().filter(blockClass::isInstance).toArray(Block[]::new);
+		return BuiltInRegistries.BLOCK.stream().filter(blockClass::isInstance).toArray(Block[]::new);
 	}
 
 	/**
@@ -45,9 +46,9 @@ public class BlockEntitySubRegistryHelper extends AbstractSubRegistryHelper<Bloc
 	 * @param name        The name for the {@link BlockEntity}.
 	 * @param blockEntity The {@link BlockEntity}.
 	 * @param validBlocks The valid blocks for this {@link BlockEntityType}.
-	 * @return A {@link RegistryObject} containing the customized {@link BlockEntityType}.
+	 * @return A {@link DeferredHolder} containing the customized {@link BlockEntityType}.
 	 */
-	public <T extends BlockEntity> RegistryObject<BlockEntityType<T>> createBlockEntity(String name, BlockEntitySupplier<? extends T> blockEntity, Supplier<Set<Block>> validBlocks) {
+	public <T extends BlockEntity> DeferredHolder<BlockEntityType<?>, BlockEntityType<T>> createBlockEntity(String name, BlockEntitySupplier<? extends T> blockEntity, Supplier<Set<Block>> validBlocks) {
 		return this.deferredRegister.register(name, () -> new BlockEntityType<>(blockEntity, validBlocks.get(), null));
 	}
 
@@ -58,9 +59,9 @@ public class BlockEntitySubRegistryHelper extends AbstractSubRegistryHelper<Bloc
 	 * @param name        The name for the {@link BlockEntity}.
 	 * @param blockEntity The {@link BlockEntity}.
 	 * @param blockClass  The block class to filter registered blocks that are an instance of it.
-	 * @return A {@link RegistryObject} containing the customized {@link BlockEntityType}.
+	 * @return A {@link DeferredHolder} containing the customized {@link BlockEntityType}.
 	 */
-	public <T extends BlockEntity> RegistryObject<BlockEntityType<T>> createBlockEntity(String name, BlockEntitySupplier<? extends T> blockEntity, Class<? extends Block> blockClass) {
+	public <T extends BlockEntity> DeferredHolder<BlockEntityType<?>, BlockEntityType<T>> createBlockEntity(String name, BlockEntitySupplier<? extends T> blockEntity, Class<? extends Block> blockClass) {
 		return this.deferredRegister.register(name, () -> new BlockEntityType<>(blockEntity, Sets.newHashSet(collectBlocks(blockClass)), null));
 	}
 

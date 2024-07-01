@@ -2,7 +2,11 @@ package com.teamabnormals.blueprint.common.world.storage.tracking;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -74,6 +78,11 @@ public interface IDataManager {
 	 * @author SmellyModder (Luke Tonon)
 	 */
 	class DataEntry<T> {
+		public static final StreamCodec<RegistryFriendlyByteBuf, DataEntry<?>> STREAM_CODEC = StreamCodec.of(
+				(buf, entry) -> entry.write(buf),
+				DataEntry::read
+		);
+		public static final StreamCodec<RegistryFriendlyByteBuf, List<DataEntry<?>>> LIST_STREAM_CODEC = STREAM_CODEC.apply(ByteBufCodecs.list());
 		private final TrackedData<T> trackedData;
 		private T value;
 		private boolean dirty;
@@ -84,17 +93,17 @@ public interface IDataManager {
 		}
 
 		/**
-		 * Reads a new entry from a {@link FriendlyByteBuf} instance.
+		 * Reads a new entry from a {@link RegistryFriendlyByteBuf} instance.
 		 *
-		 * @param buffer A {@link FriendlyByteBuf} to read a new entry from.
-		 * @return A new entry from a {@link FriendlyByteBuf} instance.
+		 * @param buffer A {@link RegistryFriendlyByteBuf} to read a new entry from.
+		 * @return A new entry from a {@link RegistryFriendlyByteBuf} instance.
 		 */
-		public static DataEntry<?> read(FriendlyByteBuf buffer) {
+		public static DataEntry<?> read(RegistryFriendlyByteBuf buffer) {
 			int id = buffer.readVarInt();
 			TrackedData<?> trackedData = TrackedDataManager.INSTANCE.getTrackedData(id);
 			Objects.requireNonNull(trackedData, String.format("Tracked Data does not exist for id %o", id));
 			DataEntry<?> entry = new DataEntry<>(trackedData);
-			entry.readValue(buffer.readNbt(), true);
+			entry.readValue(buffer, true);
 			return entry;
 		}
 
@@ -155,28 +164,19 @@ public interface IDataManager {
 		 *
 		 * @param buffer A {@link FriendlyByteBuf} to write this entry to.
 		 */
-		public void write(FriendlyByteBuf buffer) {
+		public void write(RegistryFriendlyByteBuf buffer) {
 			buffer.writeVarInt(TrackedDataManager.INSTANCE.getId(this.trackedData));
-			buffer.writeNbt(this.writeValue());
-		}
-
-		/**
-		 * Writes this entry's {@link #value} into a {@link CompoundTag}.
-		 *
-		 * @return This entry's {@link #value} as a {@link CompoundTag}.
-		 */
-		public CompoundTag writeValue() {
-			return this.getTrackedData().getProcessor().write(this.value);
+			this.getTrackedData().getStreamCodec().encode(buffer, this.getValue());
 		}
 
 		/**
 		 * Reads a new {@link #value} for this entry from a {@link CompoundTag}.
 		 *
-		 * @param compound A {@link CompoundTag} to read from.
-		 * @param dirty    If this entry should now be marked dirty.
+		 * @param buffer A {@link RegistryFriendlyByteBuf} to read from.
+		 * @param dirty  If this entry should now be marked dirty.
 		 */
-		public void readValue(CompoundTag compound, boolean dirty) {
-			this.value = this.getTrackedData().getProcessor().read(compound);
+		public void readValue(RegistryFriendlyByteBuf buffer, boolean dirty) {
+			this.value = this.getTrackedData().getStreamCodec().decode(buffer);
 			this.dirty = dirty;
 		}
 	}

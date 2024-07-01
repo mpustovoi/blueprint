@@ -9,8 +9,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -24,13 +24,6 @@ public class BlueprintItemTagsProvider extends ItemTagsProvider {
 
 	@Override
 	protected void addTags(HolderLookup.Provider p_256380_) {
-		this.tag(CHICKEN_FOOD);
-		this.tag(PIG_FOOD);
-		this.tag(STRIDER_FOOD);
-		this.tag(STRIDER_TEMPT_ITEMS);
-		this.tag(OCELOT_FOOD);
-		this.tag(CAT_FOOD);
-
 		this.tag(MILK).addTag(BUCKETS_MILK);
 		this.tag(PUMPKINS).add(Items.PUMPKIN);
 

@@ -15,7 +15,6 @@ import com.teamabnormals.blueprint.core.util.PropertyUtil;
 import com.teamabnormals.blueprint.core.util.PropertyUtil.WoodSetProperties;
 import com.teamabnormals.blueprint.core.util.registry.BlockSubRegistryHelper;
 import common.block.ChunkLoadTestBlock;
-import common.block.RotatedVoxelShapeTestBlock;
 import common.block.TestEndimatedBlock;
 import common.block.TestFallingBlock;
 import core.BlueprintTest;

@@ -7,9 +7,7 @@ import com.mojang.datafixers.util.Either;
 import com.teamabnormals.blueprint.core.util.modification.selection.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.FalseCondition;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.Set;
 import java.util.function.Predicate;

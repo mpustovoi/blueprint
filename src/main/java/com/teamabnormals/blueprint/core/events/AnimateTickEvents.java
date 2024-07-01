@@ -9,7 +9,7 @@ import net.minecraft.world.level.material.FluidState;
 /**
  * This class holds two events related to the ticking client-side effects for blocks and fluids.
  * <p>The first event {@link #BLOCK} is for injecting into {@link net.minecraft.world.level.block.Block#animateTick(BlockState, Level, BlockPos, RandomSource)}.</p>
- * <p>The second event {@link #FLUID} is for injecting into {@link net.minecraft.world.level.material.Fluid#animateTick(Level, BlockPos, FluidState, RandomSource)}.</p>
+ * <p>The second event {@link #FLUID} is for injecting into {@link FluidState#animateTick(Level, BlockPos, RandomSource)}.</p>
  *
  * @author abigailfails
  * @author SmellyModder (Luke Tonon)
@@ -78,7 +78,7 @@ public interface AnimateTickEvents {
 	@FunctionalInterface
 	interface Fluid {
 		/**
-		 * Called when this listener is fired from {@link net.minecraft.world.level.material.Fluid#animateTick(BlockState, Level, BlockPos, RandomSource)}.
+		 * Called when this listener is fired when {@link FluidState#animateTick(Level, BlockPos, RandomSource)} is used.
 		 *
 		 * @param state        The {@link FluidState} instance at the position in the level.
 		 * @param level        The {@link Level} instance where the ticking is occurring.

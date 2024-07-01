@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 public interface ResourceSelector<S extends ResourceSelector<S>> {
 	Codec<ResourceSelector<?>> CODEC = ExtraCodecs.JSON.flatXmap(element -> {
 		if (element instanceof JsonPrimitive primitive && primitive.isString()) {
-			return DataResult.success(new NamesResourceSelector(new ResourceLocation(primitive.getAsString())));
+			return DataResult.success(new NamesResourceSelector(ResourceLocation.parse(primitive.getAsString())));
 		} else if (element instanceof JsonObject jsonObject) {
 			String type = GsonHelper.getAsString(jsonObject, "type");
 			ResourceSelector.Serializer<?> serializer = ResourceSelectorSerializers.INSTANCE.getSerializer(type);

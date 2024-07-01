@@ -7,11 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
-import net.minecraft.Util;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.core.IdMap;
 import net.minecraft.resources.ResourceLocation;
 
@@ -34,7 +30,7 @@ public final class BasicRegistry<T> implements Codec<T>, IdMap<T> {
 	private final Lifecycle lifecycle;
 	private final BiMap<String, T> map = HashBiMap.create();
 	private final ObjectList<T> byId = new ObjectArrayList<>();
-	private final Object2IntMap<T> toId = new Object2IntOpenCustomHashMap<>(Util.identityStrategy());
+	private final Object2IntMap<T> toId = new Object2IntOpenHashMap<>();
 	private int nextId;
 
 	public BasicRegistry(Lifecycle lifecycle) {

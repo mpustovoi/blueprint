@@ -9,15 +9,12 @@ import com.teamabnormals.blueprint.client.renderer.block.BlueprintChestBlockEnti
 import com.teamabnormals.blueprint.client.renderer.texture.atlas.BlueprintSpriteSources;
 import com.teamabnormals.blueprint.client.screen.splash.BlueprintSplashManager;
 import com.teamabnormals.blueprint.common.block.BlueprintChiseledBookShelfBlock;
-import com.teamabnormals.blueprint.common.capability.chunkloading.ChunkLoaderCapability;
-import com.teamabnormals.blueprint.common.capability.chunkloading.ChunkLoaderEvents;
-import com.teamabnormals.blueprint.common.network.MessageC2SUpdateSlabfishHat;
-import com.teamabnormals.blueprint.common.network.entity.MessageS2CEndimation;
-import com.teamabnormals.blueprint.common.network.entity.MessageS2CTeleportEntity;
-import com.teamabnormals.blueprint.common.network.entity.MessageS2CUpdateEntityData;
-import com.teamabnormals.blueprint.common.network.particle.MessageS2CSpawnParticle;
+import com.teamabnormals.blueprint.common.network.UpdateSlabfishHatPayload;
+import com.teamabnormals.blueprint.common.network.entity.UpdateEndimationPayload;
+import com.teamabnormals.blueprint.common.network.entity.TeleportEntityPayload;
+import com.teamabnormals.blueprint.common.network.entity.UpdateEntityDataPayload;
+import com.teamabnormals.blueprint.common.network.particle.SpawnParticlesPayload;
 import com.teamabnormals.blueprint.common.world.modification.ModdedBiomeSource;
-import com.teamabnormals.blueprint.common.world.storage.tracking.DataProcessors;
 import com.teamabnormals.blueprint.common.world.storage.tracking.TrackedData;
 import com.teamabnormals.blueprint.common.world.storage.tracking.TrackedDataManager;
 import com.teamabnormals.blueprint.core.api.BlockSetTypeRegistryHelper;
@@ -31,7 +28,6 @@ import com.teamabnormals.blueprint.core.data.server.BlueprintRecipeProvider;
 import com.teamabnormals.blueprint.core.data.server.tags.*;
 import com.teamabnormals.blueprint.core.endimator.EndimationLoader;
 import com.teamabnormals.blueprint.core.other.BlueprintEvents;
-import com.teamabnormals.blueprint.core.other.tags.BlueprintItemTags;
 import com.teamabnormals.blueprint.core.registry.*;
 import com.teamabnormals.blueprint.core.util.DataUtil;
 import com.teamabnormals.blueprint.core.util.NetworkUtil;
@@ -46,43 +42,35 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.animal.Ocelot;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.monster.Strider;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.ModelEvent.RegisterGeometryLoaders;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.common.crafting.CompoundIngredient;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -105,21 +93,13 @@ public final class Blueprint {
 	public static final String NETWORK_PROTOCOL = "BP1";
 	public static final EndimationLoader ENDIMATION_LOADER = new EndimationLoader();
 	public static final RegistryHelper REGISTRY_HELPER = new RegistryHelper(MOD_ID);
-	public static final TrackedData<Byte> SLABFISH_SETTINGS = TrackedData.Builder.create(DataProcessors.BYTE, () -> (byte) 8).enablePersistence().build();
+	public static final TrackedData<Byte> SLABFISH_SETTINGS = TrackedData.Builder.create(ByteBufCodecs.BYTE, () -> (byte) 8).enablePersistence().build();
 
-	public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(MOD_ID, "net"))
-			.networkProtocolVersion(() -> NETWORK_PROTOCOL)
-			.clientAcceptedVersions(NETWORK_PROTOCOL::equals)
-			.serverAcceptedVersions(NETWORK_PROTOCOL::equals)
-			.simpleChannel();
-
-	public Blueprint() {
-		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+	public Blueprint(IEventBus bus, ModContainer modContainer) {
 		ModLoadingContext context = ModLoadingContext.get();
-		MinecraftForge.EVENT_BUS.register(this);
-		MinecraftForge.EVENT_BUS.register(new ChunkLoaderEvents());
+		NeoForge.EVENT_BUS.register(this);
 
-		this.registerMessages();
+		bus.addListener(this::registerPayloadHandlers);
 
 		CraftingHelper.register(new BlueprintAndCondition.Serializer());
 		DataUtil.registerConfigPredicate(new EqualsPredicate.Serializer());
@@ -132,7 +112,6 @@ public final class Blueprint {
 
 		REGISTRY_HELPER.getEntitySubHelper().register(bus);
 		REGISTRY_HELPER.getBlockEntitySubHelper().register(bus);
-		BlueprintHolderSets.HOLDER_SET_TYPES.register(bus);
 		BlueprintPoiTypes.POI_TYPES.register(bus);
 		BlueprintSurfaceRules.RULE_SOURCES.register(bus);
 		BlueprintLootConditions.LOOT_CONDITION_TYPES.register(bus);
@@ -144,7 +123,7 @@ public final class Blueprint {
 			}
 		});
 
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+		if (FMLEnvironment.dist == Dist.CLIENT) {
 			bus.addListener(EventPriority.NORMAL, false, RegisterColorHandlersEvent.Block.class, event -> {
 				ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 				if (resourceManager instanceof ReloadableResourceManager) {
@@ -167,20 +146,19 @@ public final class Blueprint {
 			bus.addListener(BlueprintShaders::registerShaders);
 
 			BlueprintSpriteSources.register();
-		});
+		}
 
 		bus.addListener(BlueprintDataPackRegistries::registerRegistries);
 		bus.addListener(this::registerOnEvent);
 		bus.addListener(EventPriority.LOWEST, this::commonSetup);
 		bus.addListener(EventPriority.LOWEST, this::postLoadingSetup);
 		bus.addListener(this::dataSetup);
-		bus.addListener(this::registerCapabilities);
-		context.registerConfig(ModConfig.Type.CLIENT, BlueprintConfig.CLIENT_SPEC);
-		context.registerConfig(ModConfig.Type.COMMON, BlueprintConfig.COMMON_SPEC);
+		modContainer.registerConfig(ModConfig.Type.CLIENT, BlueprintConfig.CLIENT_SPEC);
+		modContainer.registerConfig(ModConfig.Type.COMMON, BlueprintConfig.COMMON_SPEC);
 	}
 
 	private void commonSetup(FMLCommonSetupEvent event) {
-		TrackedDataManager.INSTANCE.registerData(new ResourceLocation(MOD_ID, "slabfish_head"), SLABFISH_SETTINGS);
+		TrackedDataManager.INSTANCE.registerData(ResourceLocation.fromNamespaceAndPath(MOD_ID, "slabfish_head"), SLABFISH_SETTINGS);
 
 		Set<Block> validBlocks = Sets.newHashSet(BlockEntityType.CHISELED_BOOKSHELF.validBlocks);
 		validBlocks.addAll(Sets.newHashSet(BlockEntitySubRegistryHelper.collectBlocks(BlueprintChiseledBookShelfBlock.class)));
@@ -219,7 +197,7 @@ public final class Blueprint {
 
 	private void registerOnEvent(RegisterEvent event) {
 		event.register(Registries.BIOME_SOURCE, (helper) -> {
-			helper.register("modded", ModdedBiomeSource.CODEC);
+			helper.register(ResourceLocation.fromNamespaceAndPath(MOD_ID, "modded"), ModdedBiomeSource.CODEC);
 		});
 	}
 
@@ -242,32 +220,21 @@ public final class Blueprint {
 
 	private void postLoadingSetup(FMLLoadCompleteEvent event) {
 		event.enqueueWork(() -> {
-			Chicken.FOOD_ITEMS = CompoundIngredient.of(Chicken.FOOD_ITEMS, Ingredient.of(BlueprintItemTags.CHICKEN_FOOD));
-			Pig.FOOD_ITEMS = CompoundIngredient.of(Pig.FOOD_ITEMS, Ingredient.of(BlueprintItemTags.PIG_FOOD));
-			Strider.FOOD_ITEMS = CompoundIngredient.of(Strider.FOOD_ITEMS, Ingredient.of(BlueprintItemTags.STRIDER_FOOD));
-			Strider.TEMPT_ITEMS = CompoundIngredient.of(Strider.TEMPT_ITEMS, Ingredient.of(BlueprintItemTags.STRIDER_TEMPT_ITEMS));
-			Ocelot.TEMPT_INGREDIENT = CompoundIngredient.of(Ocelot.TEMPT_INGREDIENT, Ingredient.of(BlueprintItemTags.OCELOT_FOOD));
-			Cat.TEMPT_INGREDIENT = CompoundIngredient.of(Cat.TEMPT_INGREDIENT, Ingredient.of(BlueprintItemTags.CAT_FOOD));
-
 			DataUtil.getSortedAlternativeDispenseBehaviors().forEach(DataUtil.AlternativeDispenseBehavior::register);
 			BlueprintEvents.SORTED_CUSTOM_NOTE_BLOCK_INSTRUMENTS = DataUtil.getSortedCustomNoteBlockInstruments();
 		});
 	}
 
-	private void registerCapabilities(RegisterCapabilitiesEvent event) {
-		ChunkLoaderCapability.register(event);
+	private void modelSetup(ModelEvent.RegisterGeometryLoaders event) {
+		event.register(ResourceLocation.fromNamespaceAndPath(MOD_ID, "fullbright"), FullbrightModel.Loader.INSTANCE);
 	}
 
-	private void modelSetup(RegisterGeometryLoaders event) {
-		event.register("fullbright", FullbrightModel.Loader.INSTANCE);
-	}
-
-	private void registerMessages() {
-		int id = -1;
-		CHANNEL.registerMessage(++id, MessageS2CEndimation.class, MessageS2CEndimation::serialize, MessageS2CEndimation::deserialize, MessageS2CEndimation::handle);
-		CHANNEL.registerMessage(++id, MessageS2CTeleportEntity.class, MessageS2CTeleportEntity::serialize, MessageS2CTeleportEntity::deserialize, MessageS2CTeleportEntity::handle);
-		CHANNEL.registerMessage(++id, MessageS2CSpawnParticle.class, MessageS2CSpawnParticle::serialize, MessageS2CSpawnParticle::deserialize, MessageS2CSpawnParticle::handle);
-		CHANNEL.registerMessage(++id, MessageS2CUpdateEntityData.class, MessageS2CUpdateEntityData::serialize, MessageS2CUpdateEntityData::deserialize, MessageS2CUpdateEntityData::handle);
-		CHANNEL.registerMessage(++id, MessageC2SUpdateSlabfishHat.class, MessageC2SUpdateSlabfishHat::serialize, MessageC2SUpdateSlabfishHat::deserialize, MessageC2SUpdateSlabfishHat::handle);
+	private void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
+		PayloadRegistrar registrar = event.registrar("1");
+		registrar.playToClient(UpdateEndimationPayload.TYPE, UpdateEndimationPayload.STREAM_CODEC, UpdateEndimationPayload::handle);
+		registrar.playToClient(TeleportEntityPayload.TYPE, TeleportEntityPayload.STREAM_CODEC, TeleportEntityPayload::handle);
+		registrar.playToClient(SpawnParticlesPayload.TYPE, SpawnParticlesPayload.STREAM_CODEC, SpawnParticlesPayload::handle);
+		registrar.playToClient(UpdateEntityDataPayload.TYPE, UpdateEntityDataPayload.STREAM_CODEC, UpdateEntityDataPayload::handle);
+		registrar.playToServer(UpdateSlabfishHatPayload.TYPE, UpdateSlabfishHatPayload.STREAM_CODEC, UpdateSlabfishHatPayload::handle);
 	}
 }

@@ -1,7 +1,5 @@
 package common.block;
 
-import com.teamabnormals.blueprint.common.capability.chunkloading.ChunkLoader;
-import com.teamabnormals.blueprint.common.capability.chunkloading.ChunkLoaderCapability;
 import com.teamabnormals.blueprint.core.util.NetworkUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;

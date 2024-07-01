@@ -13,10 +13,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.Serializer;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,13 +26,13 @@ import java.util.Map;
  * @author abigailfails
  */
 public class ConfigLootCondition implements LootItemCondition {
-	private final ForgeConfigSpec.ConfigValue<?> value;
+	private final ModConfigSpec.ConfigValue<?> value;
 	private final String valueID;
 	private final Map<IConfigPredicate, Boolean> predicates;
 	private final boolean inverted;
 	private final ResourceLocation location;
 
-	public ConfigLootCondition(ResourceLocation location, ForgeConfigSpec.ConfigValue<?> value, String valueID, Map<IConfigPredicate, Boolean> predicates, boolean inverted) {
+	public ConfigLootCondition(ResourceLocation location, ModConfigSpec.ConfigValue<?> value, String valueID, Map<IConfigPredicate, Boolean> predicates, boolean inverted) {
 		this.location = location;
 		this.value = value;
 		this.valueID = valueID;
@@ -59,11 +58,11 @@ public class ConfigLootCondition implements LootItemCondition {
 	}
 
 	public static class ConfigSerializer implements Serializer<ConfigLootCondition> {
-		private final Map<String, ForgeConfigSpec.ConfigValue<?>> configValues;
+		private final Map<String, ModConfigSpec.ConfigValue<?>> configValues;
 		private final ResourceLocation location;
 
-		public ConfigSerializer(String modId, Map<String, ForgeConfigSpec.ConfigValue<?>> configValues) {
-			this.location = new ResourceLocation(modId, "config");
+		public ConfigSerializer(String modId, Map<String, ModConfigSpec.ConfigValue<?>> configValues) {
+			this.location = ResourceLocation.fromNamespaceAndPath(modId, "config");
 			this.configValues = configValues;
 		}
 

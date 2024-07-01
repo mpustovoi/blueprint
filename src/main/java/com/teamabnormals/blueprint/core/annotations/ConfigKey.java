@@ -11,7 +11,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation, when applied to {@link net.minecraftforge.common.ForgeConfigSpec.ConfigValue ConfigValue} fields
+ * This annotation, when applied to {@link net.neoforged.neoforge.common.ModConfigSpec.ConfigValue} fields
  * in objects that are passed into the {@code Object...} parameter of
  * {@link DataUtil#registerConfigCondition(String, Object...) registerConfigCondition},
  * allows the value to be referred to in JSON by a {@link ConfigValueCondition ConfigValueCondition}

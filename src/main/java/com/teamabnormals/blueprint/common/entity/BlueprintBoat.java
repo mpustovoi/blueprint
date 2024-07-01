@@ -12,8 +12,12 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -21,8 +25,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.network.PlayMessages;
 
 /**
  * A {@link Boat} extension responsible for Blueprint's boats.
@@ -32,7 +34,7 @@ import net.minecraftforge.network.PlayMessages;
 public class BlueprintBoat extends Boat implements HasBlueprintBoatType {
 	private static final EntityDataAccessor<String> BOAT_TYPE = SynchedEntityData.defineId(BlueprintBoat.class, EntityDataSerializers.STRING);
 
-	public BlueprintBoat(EntityType<? extends Boat> type, Level level) {
+	public BlueprintBoat(EntityType<? extends BlueprintBoat> type, Level level) {
 		super(type, level);
 	}
 
@@ -46,14 +48,15 @@ public class BlueprintBoat extends Boat implements HasBlueprintBoatType {
 		this.zo = z;
 	}
 
-	public BlueprintBoat(PlayMessages.SpawnEntity spawnEntity, Level level) {
-		this(BlueprintEntityTypes.BOAT.get(), level);
+	@Override
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(BOAT_TYPE, BlueprintBoatTypes.UNDEFINED_BOAT_LOCATION.toString());
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(BOAT_TYPE, BlueprintBoatTypes.UNDEFINED_BOAT_LOCATION.toString());
+	public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity p_352110_) {
+		return super.getAddEntityPacket(p_352110_);
 	}
 
 	@Override
@@ -65,7 +68,7 @@ public class BlueprintBoat extends Boat implements HasBlueprintBoatType {
 	protected void readAdditionalSaveData(CompoundTag compound) {
 		if (compound.contains("Type", Tag.TAG_STRING)) {
 			String type = compound.getString("Type");
-			ResourceLocation name = new ResourceLocation(type);
+			ResourceLocation name = ResourceLocation.parse(type);
 			if (BlueprintBoatTypes.getType(name) != null) this.setType(name);
 			else this.setType(BlueprintBoatTypes.UNDEFINED_BOAT_LOCATION);
 		} else {
@@ -117,13 +120,23 @@ public class BlueprintBoat extends Boat implements HasBlueprintBoatType {
 	}
 
 	@Override
-	public double getPassengersRidingOffset() {
-		return this.getBoatType().isRaft() ? 0.25D : -0.1D;
-	}
+	protected Vec3 getPassengerAttachmentPoint(Entity p_294665_, EntityDimensions p_295933_, float p_295585_) {
+		float f = this.getSinglePassengerXOffset();
+		if (this.getPassengers().size() > 1) {
+			int i = this.getPassengers().indexOf(p_294665_);
+			if (i == 0) {
+				f = 0.2F;
+			} else {
+				f = -0.6F;
+			}
 
-	@Override
-	public Packet<ClientGamePacketListener> getAddEntityPacket() {
-		return NetworkHooks.getEntitySpawningPacket(this);
+			if (p_294665_ instanceof Animal) {
+				f += 0.2F;
+			}
+		}
+
+		return new Vec3(0.0, this.getBoatType().isRaft() ? (double)(p_295933_.height() * 0.8888889F) : (double)(p_295933_.height() / 3.0F), (double)f)
+				.yRot(-this.getYRot() * (float) (Math.PI / 180.0));
 	}
 
 	public void setType(ResourceLocation type) {
@@ -132,6 +145,6 @@ public class BlueprintBoat extends Boat implements HasBlueprintBoatType {
 
 	@Override
 	public BlueprintBoatTypes.BlueprintBoatType getBoatType() {
-		return BlueprintBoatTypes.getType(new ResourceLocation(this.entityData.get(BOAT_TYPE)));
+		return BlueprintBoatTypes.getType(ResourceLocation.parse(this.entityData.get(BOAT_TYPE)));
 	}
 }

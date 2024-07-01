@@ -13,8 +13,7 @@ import com.teamabnormals.blueprint.core.util.modification.selection.selectors.Na
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.GsonHelper;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.Set;
 import java.util.function.Predicate;
@@ -65,7 +64,7 @@ public final class ConditionedResourceSelector {
 	 */
 	public static ConditionedResourceSelector deserialize(String key, JsonElement element) throws JsonParseException {
 		if (element instanceof JsonPrimitive primitive && primitive.isString()) {
-			return new ConditionedResourceSelector(new NamesResourceSelector(new ResourceLocation(primitive.getAsString())));
+			return new ConditionedResourceSelector(new NamesResourceSelector(ResourceLocation.parse(primitive.getAsString())));
 		} else if (element instanceof JsonObject jsonObject) {
 			if (!GsonHelper.isValidNode(jsonObject, "conditions") || CraftingHelper.processConditions(GsonHelper.getAsJsonArray(jsonObject, "conditions"), ICondition.IContext.EMPTY)) {
 				String type = GsonHelper.getAsString(jsonObject, "type");

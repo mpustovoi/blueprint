@@ -1,17 +1,13 @@
 package com.teamabnormals.blueprint.core.util.registry;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.network.PlayMessages;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
-import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 /**
  * A basic {@link AbstractSubRegistryHelper} for entities.
@@ -27,21 +23,15 @@ public class EntitySubRegistryHelper extends AbstractSubRegistryHelper<EntityTyp
 	}
 
 	public EntitySubRegistryHelper(RegistryHelper parent) {
-		super(parent, DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, parent.getModId()));
+		super(parent, DeferredRegister.create(Registries.ENTITY_TYPE, parent.getModId()));
 	}
 
-	/**
-	 * Creates and registers an {@link EntityType} with the type of a {@link LivingEntity}.
-	 *
-	 * @param name                 The entity's name.
-	 * @param factory              The entity's factory.
-	 * @param entityClassification The entity's classification.
-	 * @param width                The width of the entity's bounding box.
-	 * @param height               The height of the entity's bounding box.
-	 * @return A {@link RegistryObject} containing the created {@link EntityType}.
-	 */
-	public <E extends LivingEntity> RegistryObject<EntityType<E>> createLivingEntity(String name, EntityType.EntityFactory<E> factory, MobCategory entityClassification, float width, float height) {
-		return this.deferredRegister.register(name, () -> createLivingEntity(factory, entityClassification, name, width, height));
+	public <E extends Entity> DeferredHolder<EntityType<?>, EntityType<E>> createEntity(String name, EntityType.EntityFactory<E> factory, MobCategory entityClassification, Consumer<EntityType.Builder<E>> builderConsumer) {
+		return this.deferredRegister.register(name, () -> {
+			var builder = EntityType.Builder.of(factory, entityClassification);
+			builderConsumer.accept(builder);
+			return builder.build(this.getParent().modId + ":" + name);
+		});
 	}
 
 	/**
@@ -49,34 +39,13 @@ public class EntitySubRegistryHelper extends AbstractSubRegistryHelper<EntityTyp
 	 *
 	 * @param name                 The entity's name.
 	 * @param factory              The entity's factory.
-	 * @param clientFactory        The entity's client factory.
 	 * @param entityClassification The entity's classification.
 	 * @param width                The width of the entity's bounding box.
 	 * @param height               The height of the entity's bounding box.
-	 * @return A {@link RegistryObject} containing the created {@link EntityType}.
+	 * @return A {@link DeferredHolder} containing the created {@link EntityType}.
 	 */
-	public <E extends Entity> RegistryObject<EntityType<E>> createEntity(String name, EntityType.EntityFactory<E> factory, BiFunction<PlayMessages.SpawnEntity, Level, E> clientFactory, MobCategory entityClassification, float width, float height) {
-		return this.deferredRegister.register(name, () -> createEntity(factory, clientFactory, entityClassification, name, width, height));
-	}
-
-	/**
-	 * Creates an {@link EntityType} with the type of {@link LivingEntity}.
-	 *
-	 * @param name                 The entity's name.
-	 * @param factory              The entity's factory.
-	 * @param entityClassification The entity's classification.
-	 * @param width                The width of the entity's bounding box.
-	 * @param height               The height of the entity's bounding box.
-	 * @return The created {@link EntityType}.
-	 */
-	public <E extends LivingEntity> EntityType<E> createLivingEntity(EntityType.EntityFactory<E> factory, MobCategory entityClassification, String name, float width, float height) {
-		ResourceLocation location = this.parent.prefix(name);
-		return EntityType.Builder.of(factory, entityClassification)
-				.sized(width, height)
-				.setTrackingRange(64)
-				.setShouldReceiveVelocityUpdates(true)
-				.setUpdateInterval(3)
-				.build(location.toString());
+	public <E extends Entity> DeferredHolder<EntityType<?>, EntityType<E>> createEntity(String name, EntityType.EntityFactory<E> factory, MobCategory entityClassification, float width, float height) {
+		return this.deferredRegister.register(name, () -> createEntity(factory, entityClassification, name, width, height));
 	}
 
 	/**
@@ -84,20 +53,18 @@ public class EntitySubRegistryHelper extends AbstractSubRegistryHelper<EntityTyp
 	 *
 	 * @param name                 The entity's name.
 	 * @param factory              The entity's factory.
-	 * @param clientFactory        The entity's client factory.
 	 * @param entityClassification The entity's classification.
 	 * @param width                The width of the entity's bounding box.
 	 * @param height               The height of the entity's bounding box.
 	 * @return The created {@link EntityType}.
 	 */
-	public <E extends Entity> EntityType<E> createEntity(EntityType.EntityFactory<E> factory, BiFunction<PlayMessages.SpawnEntity, Level, E> clientFactory, MobCategory entityClassification, String name, float width, float height) {
+	public <E extends Entity> EntityType<E> createEntity(EntityType.EntityFactory<E> factory, MobCategory entityClassification, String name, float width, float height) {
 		ResourceLocation location = this.parent.prefix(name);
 		return EntityType.Builder.of(factory, entityClassification)
 				.sized(width, height)
 				.setTrackingRange(64)
 				.setShouldReceiveVelocityUpdates(true)
 				.setUpdateInterval(3)
-				.setCustomClientFactory(clientFactory)
 				.build(location.toString());
 	}
 

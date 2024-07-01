@@ -12,9 +12,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * @author SmellyModder (Luke Tonon)
  */
 public final class BlueprintBoatTypes {
-	public static final ResourceLocation UNDEFINED_BOAT_LOCATION = new ResourceLocation("oak");
+	public static final ResourceLocation UNDEFINED_BOAT_LOCATION = ResourceLocation.withDefaultNamespace("oak");
 	private static final Map<ResourceLocation, BlueprintBoatType> BOATS = new HashMap<>();
 
 	static {
@@ -113,8 +113,8 @@ public final class BlueprintBoatTypes {
 			this.raft = raft;
 			String namespace = name.getNamespace();
 			String path = name.getPath();
-			this.texture = new ResourceLocation(namespace, "textures/entity/boat/" + path + ".png");
-			this.chestVariantTexture = new ResourceLocation(namespace, "textures/entity/chest_boat/" + path + ".png");
+			this.texture = ResourceLocation.fromNamespaceAndPath(namespace, "textures/entity/boat/" + path + ".png");
+			this.chestVariantTexture = ResourceLocation.fromNamespaceAndPath(namespace, "textures/entity/chest_boat/" + path + ".png");
 		}
 
 		/**
@@ -190,7 +190,7 @@ public final class BlueprintBoatTypes {
 			ResourceLocation name = this.getName();
 			String namespace = name.getNamespace();
 			String path = name.getPath();
-			return new ModelLayerLocation(new ResourceLocation(namespace, "boat/" + path), "main");
+			return new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(namespace, "boat/" + path), "main");
 		}
 
 		/**
@@ -203,7 +203,7 @@ public final class BlueprintBoatTypes {
 			ResourceLocation name = this.getName();
 			String namespace = name.getNamespace();
 			String path = name.getPath();
-			return new ModelLayerLocation(new ResourceLocation(namespace, "chest_boat/" + path), "main");
+			return new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(namespace, "chest_boat/" + path), "main");
 		}
 	}
 }

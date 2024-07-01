@@ -2,8 +2,8 @@ package com.teamabnormals.blueprint.core.events;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * An event fired for when an {@link Advancement} is being deserialized and built.
@@ -26,7 +26,7 @@ public final class AdvancementBuildingEvent extends Event {
 	 * @param location The {@link ResourceLocation} of the {@link Advancement} being built.
 	 */
 	public static void onBuildingAdvancement(Advancement.Builder builder, ResourceLocation location) {
-		MinecraftForge.EVENT_BUS.post(new AdvancementBuildingEvent(builder, location));
+		NeoForge.EVENT_BUS.post(new AdvancementBuildingEvent(builder, location));
 	}
 
 	/**

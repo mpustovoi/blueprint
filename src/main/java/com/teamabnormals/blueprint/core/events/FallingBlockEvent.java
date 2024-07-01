@@ -4,9 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 /**
  * This class holds two events related to falling blocks.
@@ -33,7 +33,7 @@ public class FallingBlockEvent extends Event {
 	 */
 	public static FallingBlockEntity onBlockFall(Level level, BlockPos pos, BlockState state, FallingBlockEntity fallingBlockEntity) {
 		FallingBlockEvent event = new BlockFallEvent(level, pos, state, fallingBlockEntity);
-		MinecraftForge.EVENT_BUS.post(event);
+		NeoForge.EVENT_BUS.post(event);
 		return event.getEntity();
 	}
 
@@ -41,14 +41,14 @@ public class FallingBlockEvent extends Event {
 	 * Handles the processing of the {@link FallingBlockTickEvent} event.
 	 */
 	public static boolean onFallingBlockTick(FallingBlockEntity fallingBlockEntity) {
-		return MinecraftForge.EVENT_BUS.post(new FallingBlockTickEvent(fallingBlockEntity));
+		return NeoForge.EVENT_BUS.post(new FallingBlockTickEvent(fallingBlockEntity)).isCanceled();
 	}
 
 	/**
 	 * This event is fired when a {@link FallingBlockEntity} is about to be spawned in the
 	 * {@link FallingBlockEntity#fall(Level, BlockPos, BlockState)} method.
 	 * <p>The event can be used to replace and modify the falling block entity before it spawns.
-	 * <p>The event is not {@link Cancelable}.
+	 * <p>The event is not cancellable.
 	 */
 	public static class BlockFallEvent extends FallingBlockEvent {
 		private final Level level;
@@ -79,15 +79,9 @@ public class FallingBlockEvent extends Event {
 	 * This event is fired when a {@link FallingBlockEntity} is ticked in the {@link FallingBlockEntity#tick()} method.
 	 * <p>If cancelled, the the falling block entity will not update.
 	 */
-	@Cancelable
-	public static class FallingBlockTickEvent extends FallingBlockEvent {
+	public static class FallingBlockTickEvent extends FallingBlockEvent implements ICancellableEvent {
 		public FallingBlockTickEvent(FallingBlockEntity fallingBlockEntity) {
 			super(fallingBlockEntity);
-		}
-
-		@Override
-		public boolean isCancelable() {
-			return true;
 		}
 	}
 }

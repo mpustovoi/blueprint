@@ -1,6 +1,6 @@
 package com.teamabnormals.blueprint.common.world.modification.structure;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -21,8 +21,7 @@ import org.jetbrains.annotations.Nullable;
  * @see StructureRepaletter
  */
 public record WeightedStructureRepaletter(TagKey<Block> replacesBlocks, WeightedRandomList<WeightedEntry.Wrapper<Block>> replacesWith) implements StructureRepaletter {
-	@SuppressWarnings("deprecation")
-	public static final Codec<WeightedStructureRepaletter> CODEC = RecordCodecBuilder.create(instance -> {
+	public static final MapCodec<WeightedStructureRepaletter> CODEC = RecordCodecBuilder.mapCodec(instance -> {
 		return instance.group(
 				TagKey.codec(Registries.BLOCK).fieldOf("replaces_blocks").forGetter(repaletter -> repaletter.replacesBlocks),
 				WeightedRandomList.codec(WeightedEntry.Wrapper.codec(BuiltInRegistries.BLOCK.byNameCodec())).fieldOf("replaces_with").forGetter(repaletter -> repaletter.replacesWith)
@@ -32,11 +31,11 @@ public record WeightedStructureRepaletter(TagKey<Block> replacesBlocks, Weighted
 	@Nullable
 	@Override
 	public BlockState getReplacement(ServerLevelAccessor level, BlockState state, RandomSource random) {
-		return state.is(this.replacesBlocks) ? this.replacesWith.getRandom(random).orElseThrow().getData().withPropertiesOf(state) : null;
+		return state.is(this.replacesBlocks) ? this.replacesWith.getRandom(random).orElseThrow().data().withPropertiesOf(state) : null;
 	}
 
 	@Override
-	public Codec<? extends StructureRepaletter> codec() {
+	public MapCodec<? extends StructureRepaletter> codec() {
 		return CODEC;
 	}
 }

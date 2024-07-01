@@ -1,6 +1,6 @@
 package com.teamabnormals.blueprint.common.world.modification.structure;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.teamabnormals.blueprint.core.Blueprint;
 import com.teamabnormals.blueprint.core.registry.BlueprintDataPackRegistries;
 import com.teamabnormals.blueprint.core.util.registry.BasicRegistry;
@@ -13,9 +13,9 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -28,15 +28,15 @@ import java.util.*;
  * @see StructureRepaletterEntry
  * @see StructureRepaletter
  */
-@Mod.EventBusSubscriber(modid = Blueprint.MOD_ID)
+@EventBusSubscriber(modid = Blueprint.MOD_ID)
 public final class StructureRepalleterManager {
-	static final BasicRegistry<Codec<? extends StructureRepaletter>> REPALLETER_SERIALIZERS = new BasicRegistry<>();
+	static final BasicRegistry<MapCodec<? extends StructureRepaletter>> REPALLETER_SERIALIZERS = new BasicRegistry<>();
 	private static final IdentityHashMap<ResourceKey<Structure>, StructureRepaletterEntry[]> ASSIGNED_REPALLETERS = new IdentityHashMap<>();
 	private static final ThreadLocal<ActiveData> ACTIVE_DATA = ThreadLocal.withInitial(ActiveData::new);
 
 	static {
-		registerSerializer(new ResourceLocation(Blueprint.MOD_ID, "simple"), SimpleStructureRepaletter.CODEC);
-		registerSerializer(new ResourceLocation(Blueprint.MOD_ID, "weighted"), WeightedStructureRepaletter.CODEC);
+		registerSerializer(ResourceLocation.fromNamespaceAndPath(Blueprint.MOD_ID, "simple"), SimpleStructureRepaletter.CODEC);
+		registerSerializer(ResourceLocation.fromNamespaceAndPath(Blueprint.MOD_ID, "weighted"), WeightedStructureRepaletter.CODEC);
 	}
 
 	@SubscribeEvent
@@ -52,12 +52,12 @@ public final class StructureRepalleterManager {
 	}
 
 	/**
-	 * Registers an identifiable {@link Codec} instance to use for serializing and deserializing {@link StructureRepaletter} instances.
+	 * Registers an identifiable {@link MapCodec} instance to use for serializing and deserializing {@link StructureRepaletter} instances.
 	 *
-	 * @param name  A {@link ResourceLocation} instance to use for identifying the {@link Codec} instance.
-	 * @param codec The {@link Codec} instance to register.
+	 * @param name  A {@link ResourceLocation} instance to use for identifying the {@link MapCodec} instance.
+	 * @param codec The {@link MapCodec} instance to register.
 	 */
-	public static synchronized void registerSerializer(ResourceLocation name, Codec<? extends StructureRepaletter> codec) {
+	public static synchronized void registerSerializer(ResourceLocation name, MapCodec<? extends StructureRepaletter> codec) {
 		REPALLETER_SERIALIZERS.register(name, codec);
 	}
 

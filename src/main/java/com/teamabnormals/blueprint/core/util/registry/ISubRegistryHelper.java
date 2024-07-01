@@ -1,7 +1,7 @@
 package com.teamabnormals.blueprint.core.util.registry;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
  * An interface for 'sub' registry helpers used in {@link RegistryHelper}.

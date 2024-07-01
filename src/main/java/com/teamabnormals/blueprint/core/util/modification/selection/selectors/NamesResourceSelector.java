@@ -25,7 +25,7 @@ public record NamesResourceSelector(Set<ResourceLocation> names) implements Reso
 	}
 
 	public NamesResourceSelector(String... names) {
-		this(Stream.of(names).map(ResourceLocation::new).collect(Collectors.toSet()));
+		this(Stream.of(names).map(ResourceLocation::parse).collect(Collectors.toSet()));
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public record NamesResourceSelector(Set<ResourceLocation> names) implements Reso
 		public NamesResourceSelector deserialize(JsonElement element) {
 			JsonArray jsonArray = element.getAsJsonArray();
 			HashSet<ResourceLocation> names = new HashSet<>();
-			jsonArray.forEach(nameElement -> names.add(new ResourceLocation(nameElement.getAsString())));
+			jsonArray.forEach(nameElement -> names.add(ResourceLocation.parse(nameElement.getAsString())));
 			return new NamesResourceSelector(names);
 		}
 	}

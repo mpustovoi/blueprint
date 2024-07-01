@@ -3,8 +3,7 @@ package com.teamabnormals.blueprint.core;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import com.teamabnormals.blueprint.core.annotations.ConfigKey;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -18,9 +17,9 @@ public final class BlueprintConfig {
 	 * Class that stores all the information about the Blueprint common config.
 	 */
 	public static final class Common {
-		public final ConfigValue<CommentedConfig> moddedBiomeSliceSizes;
+		public final ModConfigSpec.ConfigValue<CommentedConfig> moddedBiomeSliceSizes;
 
-		public Common(ForgeConfigSpec.Builder builder) {
+		public Common(ModConfigSpec.Builder builder) {
 			builder.comment(
 					"The modded biome slice sizes for dimensions",
 					"Blueprint's Modded Biome Slice System allows for datapacks and mods to add new biome areas to any dimension",
@@ -41,18 +40,18 @@ public final class BlueprintConfig {
 	 */
 	public static final class Client {
 		@ConfigKey("screen_shake_scale")
-		public final ConfigValue<Double> screenShakeScaleValue;
+		public final ModConfigSpec.ConfigValue<Double> screenShakeScaleValue;
 		public double screenShakeScale;
 		@ConfigKey("max_screen_shakers")
-		public final ConfigValue<Integer> maxScreenShakersValue;
+		public final ModConfigSpec.ConfigValue<Integer> maxScreenShakersValue;
 		public int maxScreenShakers;
 		@ConfigKey("disable_experimental_settings_screen")
-		public final ConfigValue<Boolean> disableExperimentalSettingsScreenValue;
+		public final ModConfigSpec.ConfigValue<Boolean> disableExperimentalSettingsScreenValue;
 		public boolean disableExperimentalSettingsScreen;
 
 		public final SlabfishSettings slabfishSettings;
 
-		Client(ForgeConfigSpec.Builder builder) {
+		Client(ModConfigSpec.Builder builder) {
 			this.screenShakeScaleValue = builder
 					.comment("Scale for screen shake effects")
 					.translation(makeTranslation("screen_shake_scale"))
@@ -86,15 +85,15 @@ public final class BlueprintConfig {
 	 */
 	public static final class SlabfishSettings {
 		@ConfigKey("slabfish_hat_enabled")
-		public final ConfigValue<Boolean> enabled;
+		public final ModConfigSpec.ConfigValue<Boolean> enabled;
 		@ConfigKey("slabfish_hat_backpack_enabled")
-		public final ConfigValue<Boolean> backpackEnabled;
+		public final ModConfigSpec.ConfigValue<Boolean> backpackEnabled;
 		@ConfigKey("slabfish_hat_sweater_enabled")
-		public final ConfigValue<Boolean> sweaterEnabled;
+		public final ModConfigSpec.ConfigValue<Boolean> sweaterEnabled;
 		@ConfigKey("slabfish_hat_custom_type_enabled")
-		public final ConfigValue<Boolean> typeEnabled;
+		public final ModConfigSpec.ConfigValue<Boolean> typeEnabled;
 
-		SlabfishSettings(ForgeConfigSpec.Builder builder) {
+		SlabfishSettings(ModConfigSpec.Builder builder) {
 			builder.comment("Slabfish patron hat settings.")
 					.push("slabfishSettings");
 
@@ -123,17 +122,17 @@ public final class BlueprintConfig {
 		return "blueprint.config." + name;
 	}
 
-	public static final ForgeConfigSpec CLIENT_SPEC;
+	public static final ModConfigSpec CLIENT_SPEC;
 	public static final Client CLIENT;
-	public static final ForgeConfigSpec COMMON_SPEC;
+	public static final ModConfigSpec COMMON_SPEC;
 	public static final Common COMMON;
 
 	static {
-		Pair<Client, ForgeConfigSpec> clientSpecPair = new ForgeConfigSpec.Builder().configure(Client::new);
+		Pair<Client, ModConfigSpec> clientSpecPair = new ModConfigSpec.Builder().configure(Client::new);
 		CLIENT_SPEC = clientSpecPair.getRight();
 		CLIENT = clientSpecPair.getLeft();
 
-		Pair<Common, ForgeConfigSpec> commonSpecPair = new ForgeConfigSpec.Builder().configure(Common::new);
+		Pair<Common, ModConfigSpec> commonSpecPair = new ModConfigSpec.Builder().configure(Common::new);
 		COMMON_SPEC = commonSpecPair.getRight();
 		COMMON = commonSpecPair.getLeft();
 	}

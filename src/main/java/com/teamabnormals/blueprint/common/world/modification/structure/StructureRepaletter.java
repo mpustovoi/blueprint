@@ -1,6 +1,7 @@
 package com.teamabnormals.blueprint.common.world.modification.structure;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,5 +36,5 @@ public interface StructureRepaletter {
 	 *
 	 * @return The {@link Codec} instance for serializing instances of this interface.
 	 */
-	Codec<? extends StructureRepaletter> codec();
+	MapCodec<? extends StructureRepaletter> codec();
 }

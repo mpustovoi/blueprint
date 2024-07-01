@@ -4,7 +4,6 @@ import client.*;
 import com.mojang.datafixers.util.Pair;
 import com.teamabnormals.blueprint.client.screen.splash.SplashSerializers;
 import com.teamabnormals.blueprint.common.world.storage.GlobalStorage;
-import com.teamabnormals.blueprint.common.world.storage.tracking.DataProcessors;
 import com.teamabnormals.blueprint.common.world.storage.tracking.TrackedData;
 import com.teamabnormals.blueprint.common.world.storage.tracking.TrackedDataManager;
 import com.teamabnormals.blueprint.core.Blueprint;
@@ -26,6 +25,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.worldgen.placement.CavePlacements;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -62,8 +62,8 @@ public final class BlueprintTest {
 	public static final RegistryHelper REGISTRY_HELPER = RegistryHelper.create(MOD_ID, helper -> {
 		helper.putSubHelper(ForgeRegistries.ITEMS, new TestItems.Helper(helper));
 	});
-	public static final TestGlobalStorage TEST_GLOBAL_STORAGE = GlobalStorage.createStorage(new ResourceLocation(MOD_ID, "test_storage"), new TestGlobalStorage());
-	public static final TrackedData<Boolean> TEST_TRACKED_DATA = TrackedData.Builder.create(DataProcessors.BOOLEAN, () -> false).enableSaving().enablePersistence().build();
+	public static final TestGlobalStorage TEST_GLOBAL_STORAGE = GlobalStorage.createStorage(ResourceLocation.fromNamespaceAndPath(MOD_ID, "test_storage"), new TestGlobalStorage());
+	public static final TrackedData<Boolean> TEST_TRACKED_DATA = TrackedData.Builder.create(ByteBufCodecs.BOOL, () -> false).enableSaving().enablePersistence().build();
 
 	public BlueprintTest() {
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();

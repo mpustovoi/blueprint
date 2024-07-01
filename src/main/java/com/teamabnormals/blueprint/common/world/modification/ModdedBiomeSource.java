@@ -1,7 +1,7 @@
 package com.teamabnormals.blueprint.common.world.modification;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.teamabnormals.blueprint.core.registry.BlueprintBiomes;
 import net.minecraft.core.*;
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  * @see ModdedBiomeSlice
  */
 public final class ModdedBiomeSource extends BiomeSource {
-	public static final Codec<BiomeSource> CODEC = RecordCodecBuilder.create((instance) -> {
+	public static final MapCodec<BiomeSource> CODEC = RecordCodecBuilder.mapCodec((instance) -> {
 		return instance.group(
 				BiomeSource.CODEC.fieldOf("original_biome_source").forGetter(thisBiomeSource -> thisBiomeSource instanceof ModdedBiomeSource moddedBiomeSource ? moddedBiomeSource.originalSource : thisBiomeSource)
 		).apply(instance, biomeSource -> biomeSource);
@@ -57,7 +57,7 @@ public final class ModdedBiomeSource extends BiomeSource {
 	}
 
 	@Override
-	protected Codec<? extends BiomeSource> codec() {
+	protected MapCodec<? extends BiomeSource> codec() {
 		return CODEC;
 	}
 

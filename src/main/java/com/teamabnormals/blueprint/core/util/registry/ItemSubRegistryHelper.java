@@ -4,20 +4,15 @@ import com.mojang.datafixers.util.Pair;
 import com.teamabnormals.blueprint.common.item.BlueprintBoatItem;
 import com.teamabnormals.blueprint.common.item.FuelItem;
 import com.teamabnormals.blueprint.core.registry.BlueprintBoatTypes;
-import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.DoubleHighBlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.StandingAndWallBlockItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
@@ -35,7 +30,7 @@ public class ItemSubRegistryHelper extends AbstractSubRegistryHelper<Item> {
 	}
 
 	public ItemSubRegistryHelper(RegistryHelper parent) {
-		super(parent, DeferredRegister.create(ForgeRegistries.ITEMS, parent.getModId()));
+		super(parent, DeferredRegister.create(Registries.ITEM, parent.getModId()));
 	}
 
 	/**
@@ -97,24 +92,24 @@ public class ItemSubRegistryHelper extends AbstractSubRegistryHelper<Item> {
 	 *
 	 * @param name     The name for the item.
 	 * @param supplier A {@link Supplier} containing the {@link Item}.
-	 * @return A {@link RegistryObject} containing the {@link Item}.
+	 * @return A {@link DeferredHolder} containing the {@link Item}.
 	 */
-	public <I extends Item> RegistryObject<I> createItem(String name, Supplier<? extends I> supplier) {
+	public <I extends Item> DeferredHolder<Item, I> createItem(String name, Supplier<? extends I> supplier) {
 		return this.deferredRegister.register(name, supplier);
 	}
 
 	/**
-	 * Creates and registers a {@link ForgeSpawnEggItem}.
+	 * Creates and registers a {@link DeferredSpawnEggItem}.
 	 *
 	 * @param entityName     The name of the entity this spawn egg spawns.
 	 * @param supplier       The supplied {@link EntityType}.
 	 * @param primaryColor   The egg's primary color.
 	 * @param secondaryColor The egg's secondary color.
-	 * @return A {@link RegistryObject} containing the {@link ForgeSpawnEggItem}.
-	 * @see ForgeSpawnEggItem
+	 * @return A {@link DeferredHolder} containing the {@link DeferredSpawnEggItem}.
+	 * @see DeferredSpawnEggItem
 	 */
-	public RegistryObject<ForgeSpawnEggItem> createSpawnEggItem(String entityName, Supplier<EntityType<? extends Mob>> supplier, int primaryColor, int secondaryColor) {
-		return this.deferredRegister.register(entityName + "_spawn_egg", () -> new ForgeSpawnEggItem(supplier, primaryColor, secondaryColor, new Item.Properties()));
+	public DeferredHolder<Item, DeferredSpawnEggItem> createSpawnEggItem(String entityName, Supplier<EntityType<? extends Mob>> supplier, int primaryColor, int secondaryColor) {
+		return this.deferredRegister.register(entityName + "_spawn_egg", () -> new DeferredSpawnEggItem(supplier, primaryColor, secondaryColor, new Item.Properties()));
 	}
 
 	/**
@@ -125,11 +120,11 @@ public class ItemSubRegistryHelper extends AbstractSubRegistryHelper<Item> {
 	 * @param raft  If the boats are rafts.
 	 * @return A {@link Pair} instance containing the boat item and the chest boat item.
 	 */
-	public Pair<RegistryObject<Item>, RegistryObject<Item>> createBoatAndChestBoatItem(String wood, RegistryObject<Block> block, boolean raft) {
-		ResourceLocation name = new ResourceLocation(this.parent.getModId(), wood);
-		RegistryObject<Item> boat = this.deferredRegister.register(wood + "_boat", () -> new BlueprintBoatItem(false, name, createSimpleItemProperty(1)));
-		RegistryObject<Item> chestBoat = this.deferredRegister.register(wood + "_chest_boat", () -> new BlueprintBoatItem(true, name, createSimpleItemProperty(1)));
-		BlueprintBoatTypes.registerType(name, boat, chestBoat, block, raft);
+	public Pair<DeferredHolder<Item, BlueprintBoatItem>, DeferredHolder<Item, BlueprintBoatItem>> createBoatAndChestBoatItem(String wood, DeferredHolder<Block, ?> block, boolean raft) {
+		ResourceLocation name = ResourceLocation.fromNamespaceAndPath(this.parent.getModId(), wood);
+		DeferredHolder<Item, BlueprintBoatItem> boat = this.deferredRegister.register(wood + "_boat", () -> new BlueprintBoatItem(false, name, createSimpleItemProperty(1)));
+		DeferredHolder<Item, BlueprintBoatItem> chestBoat = this.deferredRegister.register(wood + "_chest_boat", () -> new BlueprintBoatItem(true, name, createSimpleItemProperty(1)));
+		BlueprintBoatTypes.registerType(name, boat::get, chestBoat::get, block::get, raft);
 		return Pair.of(boat, chestBoat);
 	}
 
@@ -140,7 +135,7 @@ public class ItemSubRegistryHelper extends AbstractSubRegistryHelper<Item> {
 	 * @param block The {@link Block} for the boat to drop.
 	 * @return A {@link Pair} instance containing the boat item and the chest boat item.
 	 */
-	public Pair<RegistryObject<Item>, RegistryObject<Item>> createBoatAndChestBoatItem(String wood, RegistryObject<Block> block) {
+	public Pair<DeferredHolder<Item, BlueprintBoatItem>, DeferredHolder<Item, BlueprintBoatItem>> createBoatAndChestBoatItem(String wood, DeferredHolder<Block, ?> block) {
 		return createBoatAndChestBoatItem(wood, block, false);
 	}
 }

@@ -8,8 +8,6 @@ import com.teamabnormals.blueprint.core.util.modification.selection.selectors.Mu
 import com.teamabnormals.blueprint.core.util.modification.selection.selectors.NamesResourceSelector;
 import core.BlueprintTest;
 import core.registry.TestTriggers;
-import net.minecraft.advancements.FrameType;
-import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.FilledBucketTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -21,7 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

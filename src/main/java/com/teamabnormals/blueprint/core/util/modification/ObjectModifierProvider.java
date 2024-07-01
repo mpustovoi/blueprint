@@ -12,8 +12,8 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -68,7 +68,7 @@ public abstract class ObjectModifierProvider<T, S, D> implements DataProvider {
 			RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, provider);
 			ObjectModifierSerializerRegistry<T, S, D> serializerRegistry = this.serializerRegistry;
 			return CompletableFuture.allOf(entries.stream().map(entry -> {
-				Path resolvedPath = pathProvider.json(new ResourceLocation(this.modId, entry.name));
+				Path resolvedPath = pathProvider.json(ResourceLocation.fromNamespaceAndPath(this.modId, entry.name));
 				ObjectModifierGroup<T, S, D> group = new ObjectModifierGroup<>(entry.selector, entry.modifiers, entry.priority);
 				try {
 					return DataProvider.saveStable(cachedOutput, group.serialize(additionalSerializationGetter.apply(registryOps, group), serializerRegistry, entry.conditions.toArray(new ICondition[0][])), resolvedPath);
